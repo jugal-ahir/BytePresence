@@ -323,13 +323,12 @@ This project is licensed under the ISC License.
 ## 👤 Author
 
 **Jugal Ahir**
+- GitHub: [@jugal-ahir](https://github.com/jugal-ahir)
+- Repository: [BytePresence](https://github.com/jugal-ahir/BytePresence)
 
 ## 👤 Contributor
 
 **Nitant Jain**
-
-- GitHub: [@jugal-ahir](https://github.com/jugal-ahir)
-- Repository: [BytePresence](https://github.com/jugal-ahir/BytePresence)
 
 ## 🙏 Acknowledgments
 

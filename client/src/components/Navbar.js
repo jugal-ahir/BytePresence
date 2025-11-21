@@ -40,9 +40,9 @@ const Navbar = () => {
     <nav className="navbar">
       <div className="navbar-container">
         <div className="navbar-brand-wrapper">
-          <a href="#" onClick={handleBrandClick} className="navbar-brand">
-            📚 Attendance System
-          </a>
+          <button onClick={handleBrandClick} className="navbar-brand" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, font: 'inherit' }}>
+            <span>📚</span> BytePresence
+          </button>
           <button 
             className="hamburger-menu" 
             onClick={toggleMobileMenu}

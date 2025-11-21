@@ -8,6 +8,7 @@ const StudentDashboard = () => {
   const { user } = useAuth();
   const [availableSessions, setAvailableSessions] = useState([]);
   const [attendanceHistory, setAttendanceHistory] = useState([]);
+  const [attendanceStats, setAttendanceStats] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -18,12 +19,14 @@ const StudentDashboard = () => {
 
   const fetchData = async () => {
     try {
-      const [sessionsRes, historyRes] = await Promise.all([
+      const [sessionsRes, historyRes, statsRes] = await Promise.all([
         api.get('/api/sessions/available'),
-        api.get('/api/student/attendance')
+        api.get('/api/student/attendance'),
+        api.get('/api/student/attendance/stats')
       ]);
       setAvailableSessions(sessionsRes.data);
       setAttendanceHistory(historyRes.data);
+      setAttendanceStats(statsRes.data);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -85,26 +88,72 @@ const StudentDashboard = () => {
               <thead>
                 <tr>
                   <th>Session</th>
+                  <th>Course & Section</th>
                   <th>Date</th>
                   <th>Time</th>
                   <th>Status</th>
                 </tr>
               </thead>
               <tbody>
-                {attendanceHistory.map(record => (
-                  <tr key={record._id}>
-                    <td>{record.session?.title}</td>
-                    <td>{new Date(record.markedAt).toLocaleDateString()}</td>
-                    <td>{new Date(record.markedAt).toLocaleTimeString()}</td>
-                    <td>
-                      <span className={`status-badge status-${record.status}`}>
-                        {record.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
+                {attendanceHistory.map(record => {
+                  // Get the matching course from session courses
+                  const matchingCourse = record.session?.courses?.find(sc => 
+                    user?.courses?.some(uc => 
+                      uc.course === sc.course && uc.section === sc.section
+                    )
+                  );
+                  const courseDisplay = matchingCourse 
+                    ? `${matchingCourse.course} - ${matchingCourse.section}`
+                    : record.session?.courses?.map(c => `${c.course} - ${c.section}`).join(', ') || 'N/A';
+                  
+                  return (
+                    <tr key={record._id}>
+                      <td>{record.session?.title}</td>
+                      <td>{courseDisplay}</td>
+                      <td>{new Date(record.markedAt).toLocaleDateString()}</td>
+                      <td>{new Date(record.markedAt).toLocaleTimeString()}</td>
+                      <td>
+                        <span className={`status-badge status-${record.status}`}>
+                          {record.status}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
+          </div>
+        )}
+      </div>
+
+      <div className="card">
+        <h2>Attendance Statistics by Course</h2>
+        {attendanceStats.length === 0 ? (
+          <p className="no-data">No attendance statistics available yet.</p>
+        ) : (
+          <div className="attendance-stats">
+            {attendanceStats.map((stat, index) => {
+              const percentageCategory = stat.percentage >= 75 ? 'good' : stat.percentage >= 50 ? 'medium' : 'low';
+              return (
+                <div key={index} className="stat-card" data-percentage={percentageCategory}>
+                  <div className="stat-header">
+                    <h3>{stat.course} - {stat.section}</h3>
+                    <div className={`percentage-badge percentage-${percentageCategory}`}>
+                      {stat.percentage}%
+                    </div>
+                  </div>
+                  <div className="stat-details">
+                    <p><strong>Attended:</strong> {stat.attendedSessions} / {stat.totalSessions} sessions</p>
+                    <div className="progress-bar">
+                      <div 
+                        className="progress-fill" 
+                        style={{ width: `${stat.percentage}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

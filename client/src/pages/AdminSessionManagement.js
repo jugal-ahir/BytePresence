@@ -46,11 +46,29 @@ const AdminSessionManagement = () => {
     blockedStudents: []
   });
   const [editMapLocation, setEditMapLocation] = useState(null);
+  const [useManualCoordinates, setUseManualCoordinates] = useState(false);
+  const [manualLatitude, setManualLatitude] = useState('');
+  const [manualLongitude, setManualLongitude] = useState('');
+  const [editUseManualCoordinates, setEditUseManualCoordinates] = useState(false);
+  const [editManualLatitude, setEditManualLatitude] = useState('');
+  const [editManualLongitude, setEditManualLongitude] = useState('');
+  const [blockedStudentsCarouselIndex, setBlockedStudentsCarouselIndex] = useState({});
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [blockedStudentsSearch, setBlockedStudentsSearch] = useState('');
 
   useEffect(() => {
     fetchData();
     getCurrentLocation();
     fetchStudents();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const fetchStudents = async () => {
@@ -108,6 +126,38 @@ const AdminSessionManagement = () => {
         longitude: location[1]
       }
     });
+    // Update manual input fields when map is clicked
+    setManualLatitude(location[0].toFixed(6));
+    setManualLongitude(location[1].toFixed(6));
+  };
+
+  const handleManualCoordinateChange = (type, value) => {
+    const numValue = parseFloat(value);
+    if (type === 'latitude') {
+      setManualLatitude(value);
+      if (!isNaN(numValue) && numValue >= -90 && numValue <= 90) {
+        setFormData({
+          ...formData,
+          location: {
+            ...formData.location,
+            latitude: numValue
+          }
+        });
+        setMapLocation([numValue, formData.location.longitude || 0]);
+      }
+    } else if (type === 'longitude') {
+      setManualLongitude(value);
+      if (!isNaN(numValue) && numValue >= -180 && numValue <= 180) {
+        setFormData({
+          ...formData,
+          location: {
+            ...formData.location,
+            longitude: numValue
+          }
+        });
+        setMapLocation([formData.location.latitude || 0, numValue]);
+      }
+    }
   };
 
   const handleChange = (e) => {
@@ -151,7 +201,17 @@ const AdminSessionManagement = () => {
     }
 
     if (!formData.location.latitude || !formData.location.longitude) {
-      setError('Please select a location on the map');
+      setError('Please select a location on the map or enter coordinates manually');
+      return;
+    }
+    
+    // Validate coordinates
+    if (formData.location.latitude < -90 || formData.location.latitude > 90) {
+      setError('Latitude must be between -90 and 90');
+      return;
+    }
+    if (formData.location.longitude < -180 || formData.location.longitude > 180) {
+      setError('Longitude must be between -180 and 180');
       return;
     }
 
@@ -171,6 +231,10 @@ const AdminSessionManagement = () => {
         duration: 30,
         location: { latitude: null, longitude: null }
       });
+      setMapLocation(null);
+      setManualLatitude('');
+      setManualLongitude('');
+      setUseManualCoordinates(false);
       setShowForm(false);
       setStartImmediately(true);
       fetchData();
@@ -265,6 +329,8 @@ const AdminSessionManagement = () => {
       blockedStudents: session.blockedStudents ? session.blockedStudents.map(s => s._id || s) : []
     });
     setEditMapLocation([session.location.latitude, session.location.longitude]);
+    setEditManualLatitude(session.location.latitude.toFixed(6));
+    setEditManualLongitude(session.location.longitude.toFixed(6));
     setShowEditModal(true);
   };
 
@@ -280,6 +346,10 @@ const AdminSessionManagement = () => {
       blockedStudents: []
     });
     setEditMapLocation(null);
+    setEditManualLatitude('');
+    setEditManualLongitude('');
+    setEditUseManualCoordinates(false);
+    setBlockedStudentsSearch('');
   };
 
   const handleEditMapClick = (e) => {
@@ -289,6 +359,38 @@ const AdminSessionManagement = () => {
       ...editFormData,
       location: { latitude: lat, longitude: lng }
     });
+    // Update manual input fields when map is clicked
+    setEditManualLatitude(lat.toFixed(6));
+    setEditManualLongitude(lng.toFixed(6));
+  };
+
+  const handleEditManualCoordinateChange = (type, value) => {
+    const numValue = parseFloat(value);
+    if (type === 'latitude') {
+      setEditManualLatitude(value);
+      if (!isNaN(numValue) && numValue >= -90 && numValue <= 90) {
+        setEditFormData({
+          ...editFormData,
+          location: {
+            ...editFormData.location,
+            latitude: numValue
+          }
+        });
+        setEditMapLocation([numValue, editFormData.location.longitude || 0]);
+      }
+    } else if (type === 'longitude') {
+      setEditManualLongitude(value);
+      if (!isNaN(numValue) && numValue >= -180 && numValue <= 180) {
+        setEditFormData({
+          ...editFormData,
+          location: {
+            ...editFormData.location,
+            longitude: numValue
+          }
+        });
+        setEditMapLocation([editFormData.location.latitude || 0, numValue]);
+      }
+    }
   };
 
   const handleUpdateSession = async (e) => {
@@ -486,36 +588,125 @@ const AdminSessionManagement = () => {
             </div>
 
             <div className="form-group">
-              <label>Select Location (Click on map)</label>
-              <div className="leaflet-container-wrapper">
-                <MapContainer
-                  center={defaultCenter}
-                  zoom={15}
-                  style={{ height: '300px', width: '100%', borderRadius: '8px' }}
-                  scrollWheelZoom={true}
-                  eventHandlers={{
-                    click: handleMapClick
-                  }}
-                >
-                  <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              <label>Location</label>
+              <div style={{ marginBottom: '12px', display: 'flex', gap: '12px', alignItems: 'center' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 'normal' }}>
+                  <input
+                    type="radio"
+                    name="locationMethod"
+                    checked={!useManualCoordinates}
+                    onChange={() => {
+                      setUseManualCoordinates(false);
+                      if (formData.location.latitude && formData.location.longitude) {
+                        setMapLocation([formData.location.latitude, formData.location.longitude]);
+                      }
+                    }}
                   />
-                  {mapLocation && (
-                    <Marker position={mapLocation}>
-                      <Popup>Selected Location</Popup>
-                    </Marker>
-                  )}
-                </MapContainer>
+                  <span>Select on Map</span>
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 'normal' }}>
+                  <input
+                    type="radio"
+                    name="locationMethod"
+                    checked={useManualCoordinates}
+                    onChange={() => {
+                      setUseManualCoordinates(true);
+                      if (formData.location.latitude && formData.location.longitude) {
+                        setManualLatitude(formData.location.latitude.toFixed(6));
+                        setManualLongitude(formData.location.longitude.toFixed(6));
+                      }
+                    }}
+                  />
+                  <span>Enter Coordinates Manually</span>
+                </label>
               </div>
-              {formData.location.latitude && (
-                <p className="location-info">
-                  Selected: {formData.location.latitude.toFixed(6)}, {formData.location.longitude.toFixed(6)}
-                </p>
+
+              {!useManualCoordinates ? (
+                <>
+                  <div className="leaflet-container-wrapper">
+                    <MapContainer
+                      center={defaultCenter}
+                      zoom={15}
+                      style={{ height: '300px', width: '100%', borderRadius: '8px' }}
+                      scrollWheelZoom={true}
+                      eventHandlers={{
+                        click: handleMapClick
+                      }}
+                    >
+                      <TileLayer
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      />
+                      {mapLocation && (
+                        <Marker position={mapLocation}>
+                          <Popup>Selected Location</Popup>
+                        </Marker>
+                      )}
+                    </MapContainer>
+                  </div>
+                  {formData.location.latitude && (
+                    <p className="location-info">
+                      Selected: {formData.location.latitude.toFixed(6)}, {formData.location.longitude.toFixed(6)}
+                    </p>
+                  )}
+                  <button type="button" onClick={getCurrentLocation} className="btn btn-secondary" style={{ marginTop: '10px' }}>
+                    Use Current Location
+                  </button>
+                </>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    <div style={{ flex: 1 }}>
+                      <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.9rem', fontWeight: '600' }}>
+                        Latitude (-90 to 90)
+                      </label>
+                      <input
+                        type="number"
+                        step="any"
+                        className="form-control"
+                        placeholder="e.g., 28.6139"
+                        value={manualLatitude}
+                        onChange={(e) => handleManualCoordinateChange('latitude', e.target.value)}
+                        min="-90"
+                        max="90"
+                      />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.9rem', fontWeight: '600' }}>
+                        Longitude (-180 to 180)
+                      </label>
+                      <input
+                        type="number"
+                        step="any"
+                        className="form-control"
+                        placeholder="e.g., 77.2090"
+                        value={manualLongitude}
+                        onChange={(e) => handleManualCoordinateChange('longitude', e.target.value)}
+                        min="-180"
+                        max="180"
+                      />
+                    </div>
+                  </div>
+                  {formData.location.latitude && formData.location.longitude && (
+                    <p className="location-info">
+                      Coordinates: {formData.location.latitude.toFixed(6)}, {formData.location.longitude.toFixed(6)}
+                    </p>
+                  )}
+                  <button 
+                    type="button" 
+                    onClick={() => {
+                      if (formData.location.latitude && formData.location.longitude) {
+                        setMapLocation([formData.location.latitude, formData.location.longitude]);
+                        setUseManualCoordinates(false);
+                      }
+                    }}
+                    className="btn btn-secondary"
+                    disabled={!formData.location.latitude || !formData.location.longitude}
+                  >
+                    View on Map
+                  </button>
+                </div>
               )}
-              <button type="button" onClick={getCurrentLocation} className="btn btn-secondary" style={{ marginTop: '10px' }}>
-                Use Current Location
-              </button>
             </div>
 
             <button type="submit" className="btn btn-primary">
@@ -575,18 +766,56 @@ const AdminSessionManagement = () => {
                   <p><strong>End:</strong> {new Date(session.endTime).toLocaleString()}</p>
                   <p><strong>Duration:</strong> {session.duration} minutes</p>
                   <p><strong>Courses:</strong> {session.courses.map(c => `${c.course} - ${c.section}`).join(', ')}</p>
-                  {session.blockedStudents && session.blockedStudents.length > 0 && (
-                    <div className="blocked-students-info">
-                      <strong>Blocked Students ({session.blockedStudents.length}):</strong>
-                      <div className="blocked-students-list">
-                        {session.blockedStudents.map(student => (
-                          <span key={student._id || student} className="blocked-student-tag">
-                            {typeof student === 'object' ? `${student.name} (${student.enrollmentNumber})` : 'Loading...'}
-                          </span>
-                        ))}
+                  {session.blockedStudents && session.blockedStudents.length > 0 && (() => {
+                    const currentIndex = blockedStudentsCarouselIndex[session._id] || 0;
+                    const studentsPerView = windowWidth <= 768 ? 1 : 2;
+                    const maxIndex = Math.max(0, session.blockedStudents.length - studentsPerView);
+                    const canGoLeft = currentIndex > 0;
+                    const canGoRight = currentIndex < maxIndex;
+                    
+                    return (
+                      <div className="blocked-students-info">
+                        <strong>Blocked Students ({session.blockedStudents.length}):</strong>
+                        <div className="blocked-students-carousel">
+                          <button
+                            className="carousel-arrow carousel-arrow-left"
+                            onClick={() => {
+                              setBlockedStudentsCarouselIndex({
+                                ...blockedStudentsCarouselIndex,
+                                [session._id]: Math.max(0, currentIndex - 1)
+                              });
+                            }}
+                            disabled={!canGoLeft}
+                            aria-label="Previous students"
+                          >
+                            ‹
+                          </button>
+                          <div className="blocked-students-list">
+                            {session.blockedStudents
+                              .slice(currentIndex, currentIndex + studentsPerView)
+                              .map(student => (
+                                <span key={student._id || student} className="blocked-student-tag">
+                                  {typeof student === 'object' ? `${student.name} (${student.enrollmentNumber})` : 'Loading...'}
+                                </span>
+                              ))}
+                          </div>
+                          <button
+                            className="carousel-arrow carousel-arrow-right"
+                            onClick={() => {
+                              setBlockedStudentsCarouselIndex({
+                                ...blockedStudentsCarouselIndex,
+                                [session._id]: Math.min(maxIndex, currentIndex + 1)
+                              });
+                            }}
+                            disabled={!canGoRight}
+                            aria-label="Next students"
+                          >
+                            ›
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    );
+                  })()}
                   <div className="session-actions">
                     {session.status === 'active' && (
                       <button
@@ -679,40 +908,139 @@ const AdminSessionManagement = () => {
               </div>
 
               <div className="form-group">
-                <label>Select Location (Click on map)</label>
-                <div className="leaflet-container-wrapper">
-                  <MapContainer
-                    center={editMapLocation || [28.6139, 77.2090]}
-                    zoom={15}
-                    style={{ height: '300px', width: '100%', borderRadius: '8px' }}
-                    scrollWheelZoom={true}
-                    eventHandlers={{
-                      click: handleEditMapClick
-                    }}
-                  >
-                    <TileLayer
-                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                <label>Location</label>
+                <div style={{ marginBottom: '12px', display: 'flex', gap: '12px', alignItems: 'center' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 'normal' }}>
+                    <input
+                      type="radio"
+                      name="editLocationMethod"
+                      checked={!editUseManualCoordinates}
+                      onChange={() => {
+                        setEditUseManualCoordinates(false);
+                        if (editFormData.location.latitude && editFormData.location.longitude) {
+                          setEditMapLocation([editFormData.location.latitude, editFormData.location.longitude]);
+                        }
+                      }}
                     />
-                    {editMapLocation && (
-                      <Marker position={editMapLocation}>
-                        <Popup>Selected Location</Popup>
-                      </Marker>
-                    )}
-                  </MapContainer>
+                    <span>Select on Map</span>
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 'normal' }}>
+                    <input
+                      type="radio"
+                      name="editLocationMethod"
+                      checked={editUseManualCoordinates}
+                      onChange={() => {
+                        setEditUseManualCoordinates(true);
+                        if (editFormData.location.latitude && editFormData.location.longitude) {
+                          setEditManualLatitude(editFormData.location.latitude.toFixed(6));
+                          setEditManualLongitude(editFormData.location.longitude.toFixed(6));
+                        }
+                      }}
+                    />
+                    <span>Enter Coordinates Manually</span>
+                  </label>
                 </div>
-                {editFormData.location.latitude && (
-                  <p className="location-info">
-                    Selected: {editFormData.location.latitude.toFixed(6)}, {editFormData.location.longitude.toFixed(6)}
-                  </p>
+
+                {!editUseManualCoordinates ? (
+                  <>
+                    <div className="leaflet-container-wrapper">
+                      <MapContainer
+                        center={editMapLocation || [28.6139, 77.2090]}
+                        zoom={15}
+                        style={{ height: '300px', width: '100%', borderRadius: '8px' }}
+                        scrollWheelZoom={true}
+                        eventHandlers={{
+                          click: handleEditMapClick
+                        }}
+                      >
+                        <TileLayer
+                          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        />
+                        {editMapLocation && (
+                          <Marker position={editMapLocation}>
+                            <Popup>Selected Location</Popup>
+                          </Marker>
+                        )}
+                      </MapContainer>
+                    </div>
+                    {editFormData.location.latitude && (
+                      <p className="location-info">
+                        Selected: {editFormData.location.latitude.toFixed(6)}, {editFormData.location.longitude.toFixed(6)}
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                      <div style={{ flex: 1 }}>
+                        <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.9rem', fontWeight: '600' }}>
+                          Latitude (-90 to 90)
+                        </label>
+                        <input
+                          type="number"
+                          step="any"
+                          className="form-control"
+                          placeholder="e.g., 28.6139"
+                          value={editManualLatitude}
+                          onChange={(e) => handleEditManualCoordinateChange('latitude', e.target.value)}
+                          min="-90"
+                          max="90"
+                        />
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.9rem', fontWeight: '600' }}>
+                          Longitude (-180 to 180)
+                        </label>
+                        <input
+                          type="number"
+                          step="any"
+                          className="form-control"
+                          placeholder="e.g., 77.2090"
+                          value={editManualLongitude}
+                          onChange={(e) => handleEditManualCoordinateChange('longitude', e.target.value)}
+                          min="-180"
+                          max="180"
+                        />
+                      </div>
+                    </div>
+                    {editFormData.location.latitude && editFormData.location.longitude && (
+                      <p className="location-info">
+                        Coordinates: {editFormData.location.latitude.toFixed(6)}, {editFormData.location.longitude.toFixed(6)}
+                      </p>
+                    )}
+                    <button 
+                      type="button" 
+                      onClick={() => {
+                        if (editFormData.location.latitude && editFormData.location.longitude) {
+                          setEditMapLocation([editFormData.location.latitude, editFormData.location.longitude]);
+                          setEditUseManualCoordinates(false);
+                        }
+                      }}
+                      className="btn btn-secondary"
+                      disabled={!editFormData.location.latitude || !editFormData.location.longitude}
+                    >
+                      View on Map
+                    </button>
+                  </div>
                 )}
               </div>
 
               <div className="form-group">
                 <label>Block Students from Attendance</label>
+                <div style={{ marginBottom: '12px' }}>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Search by name or enrollment number..."
+                    value={blockedStudentsSearch}
+                    onChange={(e) => setBlockedStudentsSearch(e.target.value)}
+                    style={{ marginBottom: 0 }}
+                  />
+                </div>
                 <div className="blocked-students-selector">
-                  {students
-                    .filter(student => {
+                  {(() => {
+                    const enrolledStudents = students.filter(student => {
                       // Only show students enrolled in session courses
                       return editFormData.courses.some(sessionCourse => {
                         return student.courses.some(userCourse => {
@@ -720,8 +1048,26 @@ const AdminSessionManagement = () => {
                                  userCourse.section === sessionCourse.section;
                         });
                       });
-                    })
-                    .map(student => (
+                    });
+
+                    const filteredStudents = enrolledStudents.filter(student => {
+                      if (!blockedStudentsSearch.trim()) return true;
+                      const searchTerm = blockedStudentsSearch.toLowerCase().trim();
+                      return (
+                        student.name.toLowerCase().includes(searchTerm) ||
+                        student.enrollmentNumber.toLowerCase().includes(searchTerm)
+                      );
+                    });
+
+                    if (enrolledStudents.length === 0) {
+                      return <p className="no-students-message">No students enrolled in selected courses</p>;
+                    }
+
+                    if (filteredStudents.length === 0) {
+                      return <p className="no-students-message">No students found matching "{blockedStudentsSearch}"</p>;
+                    }
+
+                    return filteredStudents.map(student => (
                       <label key={student._id} className="student-checkbox-label">
                         <input
                           type="checkbox"
@@ -730,17 +1076,8 @@ const AdminSessionManagement = () => {
                         />
                         <span>{student.name} ({student.enrollmentNumber})</span>
                       </label>
-                    ))}
-                  {students.filter(student => {
-                    return editFormData.courses.some(sessionCourse => {
-                      return student.courses.some(userCourse => {
-                        return userCourse.course === sessionCourse.course && 
-                               userCourse.section === sessionCourse.section;
-                      });
-                    });
-                  }).length === 0 && (
-                    <p className="no-students-message">No students enrolled in selected courses</p>
-                  )}
+                    ));
+                  })()}
                 </div>
               </div>
 

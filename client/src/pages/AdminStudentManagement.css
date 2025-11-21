@@ -23,35 +23,61 @@
 
 .students-table {
   overflow-x: auto;
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  background: white;
 }
 
 .students-table table {
   width: 100%;
   border-collapse: collapse;
+  background: white;
 }
 
 .students-table th,
 .students-table td {
-  padding: 12px;
+  padding: 16px;
   text-align: left;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .students-table th {
-  background: #f8f9fa;
+  background: var(--primary-gradient);
   font-weight: 600;
-  color: #333;
+  color: white;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.students-table tbody tr {
+  transition: background 0.2s ease;
+}
+
+.students-table tbody tr:hover {
+  background: #f8f9fa;
 }
 
 .course-badge {
   display: inline-block;
-  background: #667eea;
+  background: var(--primary-gradient);
   color: white;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  margin-right: 5px;
-  margin-bottom: 5px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  margin-right: 6px;
+  margin-bottom: 6px;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
+  transition: var(--transition);
+}
+
+.course-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
 }
 
 .card-header-with-filter {
@@ -64,11 +90,12 @@
 }
 
 .filter-section {
-  margin-bottom: 20px;
-  padding: 16px;
-  background: #f8f9fa;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
+  margin-bottom: 24px;
+  padding: 20px;
+  background: white;
+  border-radius: 16px;
+  border: 2px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
 }
 
 .filter-controls {
@@ -133,11 +160,12 @@
 }
 
 .edit-courses-panel {
-  padding: 20px;
-  background: white;
-  border-radius: 8px;
-  margin: 10px 0;
-  border: 2px solid #e2e8f0;
+  padding: 24px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border-radius: 12px;
+  margin: 12px 0;
+  border: 2px solid var(--primary-color);
+  box-shadow: var(--shadow-sm);
 }
 
 .edit-courses-panel h3 {

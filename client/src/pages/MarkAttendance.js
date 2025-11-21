@@ -53,6 +53,7 @@ const MarkAttendance = () => {
   useEffect(() => {
     fetchSession();
     getCurrentLocation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionId]);
 
   const fetchSession = async () => {
@@ -96,6 +97,7 @@ const MarkAttendance = () => {
     if (session && userLocation) {
       calculateDistance({ lat: userLocation[0], lng: userLocation[1] }, session.location);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, userLocation]);
 
   const calculateDistance = (userLoc, targetLoc) => {
@@ -125,7 +127,7 @@ const MarkAttendance = () => {
     }
 
     try {
-      const response = await api.post(`/api/sessions/${sessionId}/mark`, {
+      await api.post(`/api/sessions/${sessionId}/mark`, {
         enrollmentNumber,
         location: {
           latitude: userLocation[0],

@@ -13,49 +13,91 @@
 }
 
 .session-card {
-  background: #f8f9fa;
-  padding: 20px;
-  border-radius: 8px;
-  border: 2px solid #e0e0e0;
-  transition: all 0.3s ease;
+  background: white;
+  padding: 24px;
+  border-radius: 16px;
+  border: 2px solid var(--border-color);
+  transition: var(--transition);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+.session-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--primary-gradient);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.session-card:hover::before {
+  transform: scaleX(1);
 }
 
 .session-card:hover {
-  border-color: #667eea;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: var(--primary-color);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
 }
 
 .session-card h3 {
-  margin-bottom: 15px;
-  color: #333;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
 }
 
 .session-card p {
-  margin-bottom: 10px;
-  color: #666;
+  margin-bottom: 12px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  font-size: 0.95rem;
 }
 
 .attendance-table {
   overflow-x: auto;
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  background: white;
 }
 
 .attendance-table table {
   width: 100%;
   border-collapse: collapse;
+  background: white;
 }
 
 .attendance-table th,
 .attendance-table td {
-  padding: 12px;
+  padding: 16px;
   text-align: left;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .attendance-table th {
-  background: #f8f9fa;
+  background: var(--primary-gradient);
   font-weight: 600;
-  color: #333;
+  color: white;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.attendance-table tbody tr {
+  transition: background 0.2s ease;
+}
+
+.attendance-table tbody tr:hover {
+  background: #f8f9fa;
 }
 
 .status-badge {
@@ -310,6 +352,175 @@
 
   .marked-time {
     font-size: 0.8rem;
+  }
+}
+
+/* Attendance Statistics Styles */
+.attendance-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.stat-card {
+  background: #ffffff !important;
+  padding: 20px;
+  border-radius: 12px;
+  border: 2px solid #667eea !important;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2);
+  border-color: #764ba2;
+}
+
+.stat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.stat-header h3 {
+  margin: 0;
+  color: #2d3748;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.percentage-badge {
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  min-width: 60px;
+  text-align: center;
+}
+
+.percentage-good {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.percentage-medium {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+}
+
+.percentage-low {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.stat-details {
+  margin-top: 12px;
+}
+
+.stat-details p {
+  margin: 0 0 12px 0;
+  color: #4a5568;
+  font-size: 0.95rem;
+}
+
+.stat-details strong {
+  color: #2d3748;
+  font-weight: 600;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 12px;
+  background: #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  border-radius: 10px;
+  transition: width 0.5s ease;
+  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+}
+
+/* Dynamic progress bar colors based on percentage */
+.stat-card[data-percentage="good"] .progress-fill {
+  background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+}
+
+.stat-card[data-percentage="medium"] .progress-fill {
+  background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
+  box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+}
+
+.stat-card[data-percentage="low"] .progress-fill {
+  background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+}
+
+/* Mobile Responsive for Stats */
+@media (max-width: 768px) {
+  .attendance-stats {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .stat-card {
+    background: #ffffff !important;
+    padding: 18px;
+    border-radius: 16px;
+    border: 2px solid #667eea !important;
+  }
+
+  .stat-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .stat-header h3 {
+    font-size: 1rem;
+  }
+
+  .percentage-badge {
+    font-size: 1rem;
+    padding: 6px 14px;
+  }
+
+  .stat-details p {
+    font-size: 0.9rem;
+  }
+
+  .progress-bar {
+    height: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .stat-card {
+    background: #ffffff !important;
+    padding: 16px;
+    border: 2px solid #667eea !important;
+  }
+
+  .stat-header h3 {
+    font-size: 0.95rem;
+  }
+
+  .percentage-badge {
+    font-size: 0.95rem;
+    padding: 5px 12px;
   }
 }
 

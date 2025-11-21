@@ -2,11 +2,24 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
+  margin-bottom: 32px;
+  padding: 24px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+  border-left: 4px solid var(--primary-color);
 }
 
 .mark-attendance-header h1 {
-  color: #333;
+  color: var(--text-primary);
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
 }
 
 .map-info {
@@ -41,9 +54,17 @@
 
 .leaflet-container-wrapper {
   width: 100%;
-  border-radius: 8px;
+  border-radius: 16px;
   overflow: hidden;
-  border: 2px solid #e0e0e0;
+  border: 2px solid var(--border-color);
+  box-shadow: var(--shadow-md);
+  margin-bottom: 24px;
+  transition: var(--transition);
+}
+
+.leaflet-container-wrapper:hover {
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary-color);
 }
 
 .leaflet-container {
