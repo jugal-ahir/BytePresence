@@ -1,0 +1,237 @@
+.navbar {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1rem 0;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.navbar-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar-brand-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.navbar-brand {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: white;
+  text-decoration: none;
+  transition: opacity 0.3s ease;
+}
+
+.navbar-brand:hover {
+  opacity: 0.9;
+}
+
+.navbar-menu {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.navbar-link {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  transition: opacity 0.3s ease;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+.navbar-link:hover {
+  opacity: 0.8;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.navbar-user-section {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.navbar-user {
+  color: white;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.navbar-logout-btn {
+  padding: 8px 16px;
+  font-size: 14px;
+}
+
+.hamburger-menu {
+  display: none;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 30px;
+  height: 30px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 10;
+}
+
+.hamburger-line {
+  width: 30px;
+  height: 3px;
+  background: white;
+  border-radius: 3px;
+  transition: all 0.3s ease;
+  transform-origin: center;
+}
+
+.hamburger-line.open:nth-child(1) {
+  transform: rotate(45deg) translate(8px, 8px);
+}
+
+.hamburger-line.open:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-line.open:nth-child(3) {
+  transform: rotate(-45deg) translate(8px, -8px);
+}
+
+/* Mobile Styles */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0.875rem 0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  .navbar-container {
+    flex-direction: column;
+    padding: 0 16px;
+    position: relative;
+  }
+
+  .navbar-brand-wrapper {
+    width: 100%;
+    padding: 0;
+  }
+
+  .navbar-brand {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+
+  .hamburger-menu {
+    display: flex;
+  }
+
+  .navbar-menu {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    padding: 20px 16px;
+    margin-top: 12px;
+    border-radius: 0 0 16px 16px;
+    gap: 12px;
+    animation: slideDown 0.3s ease;
+  }
+
+  .navbar-menu.mobile-open {
+    display: flex;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .navbar-link {
+    width: 100%;
+    padding: 14px 16px;
+    text-align: left;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .navbar-link:active {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(0.98);
+  }
+
+  .navbar-user-section {
+    flex-direction: column;
+    width: 100%;
+    gap: 12px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    margin-top: 8px;
+  }
+
+  .navbar-user {
+    width: 100%;
+    text-align: center;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    font-size: 0.95rem;
+  }
+
+  .navbar-logout-btn {
+    width: 100%;
+    padding: 14px 20px;
+    font-size: 1rem;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    font-weight: 600;
+    color: white;
+  }
+
+  .navbar-logout-btn:active {
+    transform: scale(0.98);
+    background: rgba(255, 255, 255, 0.3);
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar-brand {
+    font-size: 1.15rem;
+  }
+
+  .hamburger-menu {
+    width: 28px;
+    height: 28px;
+  }
+
+  .hamburger-line {
+    width: 28px;
+    height: 2.5px;
+  }
+}

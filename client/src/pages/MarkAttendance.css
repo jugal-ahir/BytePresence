@@ -1,0 +1,285 @@
+.mark-attendance-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.mark-attendance-header h1 {
+  color: #333;
+}
+
+.map-info {
+  margin-bottom: 15px;
+  color: #666;
+  font-style: italic;
+}
+
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-left: 10px;
+}
+
+.status-active {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-scheduled {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-ended {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.leaflet-container-wrapper {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid #e0e0e0;
+}
+
+.leaflet-container {
+  font-family: inherit;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .mark-attendance-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .mark-attendance-header h1 {
+    font-size: 1.6rem;
+    margin-bottom: 0;
+    color: #2d3748;
+    font-weight: 700;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    padding-bottom: 12px;
+  }
+
+  .mark-attendance-header .btn {
+    width: 100%;
+    text-align: center;
+    border-radius: 12px;
+    padding: 14px 24px;
+    margin-top: 0;
+  }
+
+  .map-info {
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+    color: #4a5568;
+    padding: 12px;
+    background: #edf2f7;
+    border-radius: 10px;
+    border-left: 4px solid #667eea;
+  }
+
+  .leaflet-container-wrapper {
+    height: 320px !important;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    border: 2px solid #e2e8f0;
+    overflow: hidden;
+  }
+
+  .leaflet-container-wrapper .leaflet-container {
+    height: 320px !important;
+  }
+
+  .status-badge {
+    font-size: 11px;
+    padding: 6px 12px;
+    margin-left: 8px;
+    border-radius: 20px;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .status-active {
+    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+    color: white;
+  }
+
+  .status-scheduled {
+    background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+    color: white;
+  }
+
+  .status-ended {
+    background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+    color: white;
+  }
+
+  .card h2 {
+    font-size: 1.3rem;
+    color: #2d3748;
+    font-weight: 700;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #e2e8f0;
+  }
+
+  .card p {
+    font-size: 0.95rem;
+    color: #4a5568;
+    line-height: 1.6;
+    margin-bottom: 12px;
+    padding: 8px 0;
+  }
+
+  .card p:last-child {
+    margin-bottom: 0;
+  }
+
+  .card p strong {
+    color: #2d3748;
+    font-weight: 600;
+    display: inline-block;
+    min-width: 140px;
+  }
+
+  .card .btn {
+    width: 100%;
+    margin-top: 28px;
+    padding: 14px 24px;
+    font-size: 16px;
+    border-radius: 12px;
+    display: block;
+    text-align: center;
+  }
+
+  .card form {
+    margin-top: 20px;
+  }
+
+  .card .form-group {
+    margin-bottom: 22px;
+  }
+
+  .card .form-group:last-of-type {
+    margin-bottom: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .mark-attendance-header h1 {
+    font-size: 1.4rem;
+  }
+
+  .leaflet-container-wrapper {
+    height: 280px !important;
+  }
+
+  .leaflet-container-wrapper .leaflet-container {
+    height: 280px !important;
+  }
+
+  .map-info {
+    font-size: 0.85rem;
+    padding: 10px;
+  }
+}
+
+.attendance-already-marked {
+  background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+  border: 2px solid #28a745;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.marked-badge {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.check-icon {
+  width: 48px;
+  height: 48px;
+  background: #28a745;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.marked-badge strong {
+  display: block;
+  color: #155724;
+  font-size: 1.1rem;
+  margin-bottom: 4px;
+}
+
+.marked-badge p {
+  color: #155724;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.marked-message {
+  color: #155724;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin: 0;
+  padding-top: 12px;
+  border-top: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+.form-control:disabled {
+  background: #e9ecef;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+@media (max-width: 768px) {
+  .attendance-already-marked {
+    padding: 16px;
+    margin-bottom: 20px;
+  }
+
+  .marked-badge {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .check-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+
+  .marked-badge strong {
+    font-size: 1rem;
+  }
+
+  .marked-badge p {
+    font-size: 0.85rem;
+  }
+
+  .marked-message {
+    font-size: 0.9rem;
+    padding-top: 10px;
+  }
+}
