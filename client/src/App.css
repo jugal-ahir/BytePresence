@@ -364,6 +364,23 @@
   }
 }
 
+.footer {
+  text-align: center;
+  padding: 24px;
+  margin-top: 40px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  border-top: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(10px);
+}
+
+.footer p {
+  margin: 0;
+  font-size: 0.95rem;
+  letter-spacing: 0.3px;
+}
+
 @media (max-width: 480px) {
   .container {
     padding: 10px;

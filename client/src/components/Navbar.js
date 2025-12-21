@@ -43,8 +43,8 @@ const Navbar = () => {
           <button onClick={handleBrandClick} className="navbar-brand" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, font: 'inherit' }}>
             <span>📚</span> BytePresence
           </button>
-          <button 
-            className="hamburger-menu" 
+          <button
+            className="hamburger-menu"
             onClick={toggleMobileMenu}
             aria-label="Toggle menu"
           >
@@ -88,9 +88,7 @@ const Navbar = () => {
               <Link to="/login" className="navbar-link" onClick={handleLinkClick}>
                 Login
               </Link>
-              <Link to="/register" className="navbar-link" onClick={handleLinkClick}>
-                Register
-              </Link>
+
             </>
           )}
         </div>

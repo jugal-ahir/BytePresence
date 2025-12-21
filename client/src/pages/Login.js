@@ -78,9 +78,7 @@ const Login = () => {
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
-        <p className="login-footer">
-          Don't have an account? <Link to="/register">Register as Student</Link>
-        </p>
+
       </div>
     </div>
   );

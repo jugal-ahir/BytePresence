@@ -72,6 +72,9 @@ function App() {
             />
             <Route path="/" element={<Navigate to="/login" replace />} />
           </Routes>
+          <footer className="footer">
+            <p>Designed and Developed with ❤️ by Jugal Vaghmashi</p>
+          </footer>
         </div>
       </Router>
     </AuthProvider>
