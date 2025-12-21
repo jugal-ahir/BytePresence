@@ -4,6 +4,27 @@ const User = require('../models/User');
 const Course = require('../models/Course');
 const { adminAuth } = require('../middleware/auth');
 const { body, validationResult } = require('express-validator');
+const AttendanceSession = require('../models/AttendanceSession');
+
+// Get Admin Stats (High Performance)
+router.get('/stats', adminAuth, async (req, res) => {
+  try {
+    const [totalStudents, totalSessions, activeSessions] = await Promise.all([
+      User.countDocuments({ role: 'student' }),
+      AttendanceSession.countDocuments(),
+      AttendanceSession.countDocuments({ status: 'active' })
+    ]);
+
+    res.json({
+      totalStudents,
+      totalSessions,
+      activeSessions
+    });
+  } catch (error) {
+    console.error('Error fetching admin stats:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 // Register student (Admin)
 router.post('/register-student', adminAuth, [

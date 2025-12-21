@@ -95,22 +95,24 @@ router.get('/available', auth, async (req, res) => {
       });
     });
 
-    // Check attendance status for each session
-    const sessionsWithAttendance = await Promise.all(
-      availableSessions.map(async (session) => {
-        const attendance = await Attendance.findOne({
-          session: session._id,
-          student: user._id
-        });
+    // Check attendance status for all available sessions in one query
+    const sessionIds = availableSessions.map(s => s._id);
+    const attendanceRecords = await Attendance.find({
+      session: { $in: sessionIds },
+      student: user._id
+    });
 
-        const sessionData = session.toObject();
-        sessionData.attendanceMarked = !!attendance;
-        if (attendance) {
-          sessionData.markedAt = attendance.markedAt;
-        }
-        return sessionData;
-      })
-    );
+    const attendanceMap = new Map(attendanceRecords.map(a => [a.session.toString(), a]));
+
+    const sessionsWithAttendance = availableSessions.map(session => {
+      const attendance = attendanceMap.get(session._id.toString());
+      const sessionData = session.toObject();
+      sessionData.attendanceMarked = !!attendance;
+      if (attendance) {
+        sessionData.markedAt = attendance.markedAt;
+      }
+      return sessionData;
+    });
 
     res.json(sessionsWithAttendance);
   } catch (error) {

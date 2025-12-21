@@ -17,15 +17,8 @@ const AdminDashboard = () => {
 
   const fetchStats = async () => {
     try {
-      const [studentsRes, sessionsRes] = await Promise.all([
-        api.get('/api/admin/students'),
-        api.get('/api/sessions/admin')
-      ]);
-      setStats({
-        totalStudents: studentsRes.data.length,
-        totalSessions: sessionsRes.data.length,
-        activeSessions: sessionsRes.data.filter(s => s.status === 'active').length
-      });
+      const response = await api.get('/api/admin/stats');
+      setStats(response.data);
     } catch (error) {
       console.error('Error fetching stats:', error);
     } finally {

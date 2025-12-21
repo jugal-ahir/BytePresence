@@ -66,5 +66,9 @@ const attendanceSessionSchema = new mongoose.Schema({
   timestamps: true
 });
 
+// Indexing for faster dashboard queries
+attendanceSessionSchema.index({ status: 1, startTime: -1 });
+attendanceSessionSchema.index({ createdBy: 1 });
+
 module.exports = mongoose.model('AttendanceSession', attendanceSessionSchema);
 
