@@ -9,7 +9,10 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  credentials: true
+}));
 app.use(express.json());
 
 // MongoDB Connection
@@ -18,8 +21,8 @@ mongoose.connect(MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
-.then(() => console.log('MongoDB Connected'))
-.catch(err => console.error('MongoDB connection error:', err));
+  .then(() => console.log('MongoDB Connected'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));

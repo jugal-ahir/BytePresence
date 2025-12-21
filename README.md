@@ -21,7 +21,7 @@ A comprehensive, full-stack web application for managing student attendance with
 
 - **🔐 Easy Registration**: Self-registration with course and section selection
 - **✅ Smart Attendance Marking**: Mark attendance with enrollment number verification
-- **📍 Geo-Location Verification**: Automatic GPS-based location validation (10-meter radius)
+- **📍 Geo-Location Verification**: Automatic GPS-based location validation (500-meter radius)
 - **🗺️ Interactive Map View**: Visual map display showing allowed attendance area with real-time position tracking
 - **📊 Real-Time Status**: View available sessions and complete attendance history
 - **🔒 One-Time Marking**: Prevents duplicate attendance entries automatically
@@ -284,7 +284,7 @@ BytePresence/
 Sessions are checked every second using `node-cron` to ensure precise timing. Scheduled sessions automatically start and end at the exact scheduled times with zero delay.
 
 ### Geo-Location Verification
-Uses the Haversine formula to calculate the distance between student location and session location. Students must be within 10 meters (configurable) to mark attendance. Real-time map visualization helps students understand their position.
+Uses the Haversine formula to calculate the distance between student location and session location. Students must be within 500 meters (configurable) to mark attendance. Real-time map visualization helps students understand their position.
 
 ### PDF Report Generation
 Generates professional PDF reports with:

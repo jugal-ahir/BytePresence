@@ -39,7 +39,7 @@ const attendanceSessionSchema = new mongoose.Schema({
     },
     radius: {
       type: Number,
-      default: 10 // 10 meters
+      default: 500 // 500 meters
     }
   },
   status: {

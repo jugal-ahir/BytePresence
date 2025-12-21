@@ -44,7 +44,7 @@ router.post('/', adminAuth, [
       location: {
         latitude: location.latitude,
         longitude: location.longitude,
-        radius: location.radius || 10
+        radius: location.radius || 500
       },
       status: startTime ? 'scheduled' : 'active',
       createdBy: req.user._id,
@@ -89,8 +89,8 @@ router.get('/available', auth, async (req, res) => {
     const availableSessions = activeSessions.filter(session => {
       return session.courses.some(sessionCourse => {
         return user.courses.some(userCourse => {
-          return userCourse.course === sessionCourse.course && 
-                 userCourse.section === sessionCourse.section;
+          return userCourse.course === sessionCourse.course &&
+            userCourse.section === sessionCourse.section;
         });
       });
     });
@@ -102,7 +102,7 @@ router.get('/available', auth, async (req, res) => {
           session: session._id,
           student: user._id
         });
-        
+
         const sessionData = session.toObject();
         sessionData.attendanceMarked = !!attendance;
         if (attendance) {
@@ -154,8 +154,8 @@ router.post('/:sessionId/mark', auth, [
     // Check if student is enrolled in session courses
     const isEnrolled = session.courses.some(sessionCourse => {
       return user.courses.some(userCourse => {
-        return userCourse.course === sessionCourse.course && 
-               userCourse.section === sessionCourse.section;
+        return userCourse.course === sessionCourse.course &&
+          userCourse.section === sessionCourse.section;
       });
     });
 
@@ -178,7 +178,7 @@ router.post('/:sessionId/mark', auth, [
     );
 
     if (!withinRadius) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         message: 'You are not within the allowed location radius',
         distance: 'outside'
       });
@@ -220,7 +220,7 @@ router.get('/:sessionId', auth, async (req, res) => {
     const session = await AttendanceSession.findById(req.params.sessionId)
       .populate('createdBy', 'name email')
       .populate('blockedStudents', 'name enrollmentNumber email');
-    
+
     if (!session) {
       return res.status(404).json({ message: 'Session not found' });
     }
@@ -264,7 +264,7 @@ router.get('/:sessionId/attendance', adminAuth, async (req, res) => {
     const attendance = await Attendance.find({ session: req.params.sessionId })
       .populate('student', 'name enrollmentNumber email courses')
       .sort({ markedAt: -1 });
-    
+
     res.json(attendance);
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
@@ -276,7 +276,7 @@ router.patch('/:sessionId/close', adminAuth, async (req, res) => {
   try {
     const { sessionId } = req.params;
     const session = await AttendanceSession.findById(sessionId);
-    
+
     if (!session) {
       return res.status(404).json({ message: 'Session not found' });
     }
@@ -318,7 +318,7 @@ router.patch('/:sessionId', adminAuth, [
 
     const { sessionId } = req.params;
     const { title, courses, startTime, duration, location, blockedStudents } = req.body;
-    
+
     const session = await AttendanceSession.findById(sessionId);
     if (!session) {
       return res.status(404).json({ message: 'Session not found' });
@@ -333,18 +333,18 @@ router.patch('/:sessionId', adminAuth, [
     if (title) session.title = title;
     if (courses) session.courses = courses;
     if (blockedStudents !== undefined) session.blockedStudents = blockedStudents;
-    
+
     if (duration) {
       session.duration = duration;
       // Recalculate endTime if duration changes
       session.endTime = new Date(session.startTime.getTime() + duration * 60000);
     }
-    
+
     if (location) {
       session.location = {
         latitude: location.latitude,
         longitude: location.longitude,
-        radius: location.radius || session.location.radius || 10
+        radius: location.radius || session.location.radius || 500
       };
     }
 
@@ -359,7 +359,7 @@ router.patch('/:sessionId', adminAuth, [
     const updatedSession = await AttendanceSession.findById(sessionId)
       .populate('createdBy', 'name email')
       .populate('blockedStudents', 'name enrollmentNumber email');
-    
+
     res.json({ message: 'Session updated successfully', session: updatedSession });
   } catch (error) {
     console.error('Error updating session:', error);
@@ -372,17 +372,17 @@ router.delete('/:sessionId', adminAuth, async (req, res) => {
   try {
     const { sessionId } = req.params;
     const session = await AttendanceSession.findById(sessionId);
-    
+
     if (!session) {
       return res.status(404).json({ message: 'Session not found' });
     }
 
     // Delete all attendance records for this session
     await Attendance.deleteMany({ session: sessionId });
-    
+
     // Delete the session
     await AttendanceSession.findByIdAndDelete(sessionId);
-    
+
     res.json({ message: 'Session deleted successfully' });
   } catch (error) {
     console.error('Error deleting session:', error);

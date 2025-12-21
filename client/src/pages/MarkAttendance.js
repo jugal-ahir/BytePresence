@@ -158,10 +158,10 @@ const MarkAttendance = () => {
   }
 
   const now = new Date();
-  const isActive = session.status === 'active' && 
-                   now >= new Date(session.startTime) && 
-                   now <= new Date(session.endTime);
-  const isWithinRadius = distance !== null && distance <= (session.location.radius || 10);
+  const isActive = session.status === 'active' &&
+    now >= new Date(session.startTime) &&
+    now <= new Date(session.endTime);
+  const isWithinRadius = distance !== null && distance <= (session.location.radius || 500);
 
   const center = [session.location.latitude, session.location.longitude];
 
@@ -177,7 +177,7 @@ const MarkAttendance = () => {
       <div className="card">
         <h2>{session.title}</h2>
         <p><strong>Time:</strong> {new Date(session.startTime).toLocaleString()} - {new Date(session.endTime).toLocaleString()}</p>
-        <p><strong>Status:</strong> 
+        <p><strong>Status:</strong>
           <span className={`status-badge status-${session.status}`}>
             {session.status}
           </span>
@@ -190,7 +190,7 @@ const MarkAttendance = () => {
       <div className="card">
         <h2>Location Map</h2>
         <p className="map-info">
-          The red circle shows the allowed {session.location.radius || 10}-meter radius. You must be within this area to mark attendance.
+          The red circle shows the allowed {session.location.radius || 500}-meter radius. You must be within this area to mark attendance.
         </p>
         <div className="leaflet-container-wrapper">
           <MapContainer
@@ -205,7 +205,7 @@ const MarkAttendance = () => {
             />
             <Circle
               center={center}
-              radius={session.location.radius || 10}
+              radius={session.location.radius || 500}
               pathOptions={{
                 fillColor: '#ff0000',
                 fillOpacity: 0.2,
@@ -230,7 +230,7 @@ const MarkAttendance = () => {
         <h2>Mark Your Attendance</h2>
         {error && <div className="error-message">{error}</div>}
         {success && <div className="success-message">{success}</div>}
-        
+
         {attendanceMarked && (
           <div className="attendance-already-marked">
             <div className="marked-badge">
@@ -256,7 +256,7 @@ const MarkAttendance = () => {
 
         {!attendanceMarked && isActive && distance !== null && !isWithinRadius && (
           <div className="error-message">
-            You are outside the allowed location radius. Please move within {session.location.radius || 10} meters of the target location.
+            You are outside the allowed location radius. Please move within {session.location.radius || 500} meters of the target location.
           </div>
         )}
 
@@ -277,10 +277,10 @@ const MarkAttendance = () => {
             className="btn btn-primary"
             disabled={attendanceMarked || marking || !isActive || !isWithinRadius || !userLocation}
           >
-            {attendanceMarked 
-              ? 'Attendance Already Marked' 
-              : marking 
-                ? 'Marking...' 
+            {attendanceMarked
+              ? 'Attendance Already Marked'
+              : marking
+                ? 'Marking...'
                 : 'Mark Attendance'}
           </button>
         </form>
