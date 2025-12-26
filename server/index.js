@@ -57,5 +57,10 @@ cron.schedule('* * * * * *', checkScheduledSessions);
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+
+  // Initialize keep-alive for Render
+  const { startKeepAlive } = require('./utils/keepAlive');
+  const BACKEND_URL = process.env.BACKEND_URL || 'https://byte-copied.onrender.com/api/health';
+  startKeepAlive(BACKEND_URL);
 });
 
