@@ -236,6 +236,24 @@ const AdminSessionManagement = () => {
     return allSections.every(s => selectedSectionsOfCourse.includes(s));
   };
 
+  const handleSelectAllSectionsForSelectedCourses = () => {
+    let newCourses = [...formData.courses];
+
+    tempSelectedCourseNames.forEach(courseName => {
+      const allSections = courses
+        .filter(c => c.name === courseName)
+        .map(c => c.section);
+
+      allSections.forEach(section => {
+        if (!newCourses.some(c => c.course === courseName && c.section === section)) {
+          newCourses.push({ course: courseName, section });
+        }
+      });
+    });
+
+    setFormData({ ...formData, courses: newCourses });
+  };
+
   const handleRemoveCourse = (index) => {
     setFormData({
       ...formData,
@@ -484,7 +502,7 @@ const AdminSessionManagement = () => {
     });
   };
 
-  const uniqueCourses = [...new Set(courses.map(c => c.name))];
+  const uniqueCourses = [...new Set(courses.map(c => c.name))].sort();
 
   // Pagination logic
   const totalPages = Math.ceil(sessions.length / sessionsPerPage);
@@ -592,17 +610,17 @@ const AdminSessionManagement = () => {
 
             <div className="form-group">
               <label>Select Courses & Sections</label>
-              <div className="course-multi-selector">
-                {/* Step 1: Course Selection */}
-                <div className="selection-step">
-                  <div className="step-header">
-                    <span className="step-badge">1</span>
+              <div className="course-multi-selector-v5">
+                {/* Step 1: Course Selection (Vertical List) */}
+                <div className="selection-step-v5">
+                  <div className="step-header-v5">
+                    <span className="step-badge-v5">1</span>
                     <label>Select Courses</label>
                   </div>
-                  <div className="search-bar-wrapper">
+                  <div className="search-bar-wrapper-v5">
                     <input
                       type="text"
-                      className="form-control"
+                      className="form-control search-input-v5"
                       placeholder="Search courses..."
                       value={courseSearchTerm}
                       onChange={(e) => setCourseSearchTerm(e.target.value)}
@@ -610,62 +628,72 @@ const AdminSessionManagement = () => {
                     {courseSearchTerm && (
                       <button
                         type="button"
-                        className="clear-search"
+                        className="clear-search-v5"
                         onClick={() => setCourseSearchTerm('')}
                       >
                         ×
                       </button>
                     )}
                   </div>
-                  <div className="course-names-grid">
+                  <div className="course-grid-v5">
                     {uniqueCourses
                       .filter(name => name.toLowerCase().includes(courseSearchTerm.toLowerCase()))
                       .map(name => (
-                        <label key={name} className={`course-name-label ${tempSelectedCourseNames.includes(name) ? 'active' : ''}`}>
+                        <label key={name} className={`course-card-v5 ${tempSelectedCourseNames.includes(name) ? 'selected' : ''}`}>
                           <input
                             type="checkbox"
                             checked={tempSelectedCourseNames.includes(name)}
                             onChange={() => toggleCourseNameSelection(name)}
                           />
-                          <span>{name}</span>
+                          <span className="course-card-label-v5">{name}</span>
                         </label>
                       ))}
+                    {uniqueCourses.filter(name => name.toLowerCase().includes(courseSearchTerm.toLowerCase())).length === 0 && (
+                      <div className="no-results">No courses found matching "{courseSearchTerm}"</div>
+                    )}
                   </div>
                 </div>
 
-                {/* Step 2: Section Selection */}
+                {/* Step 2: Section Selection (High Visibility Cards) */}
                 {tempSelectedCourseNames.length > 0 && (
-                  <div className="selection-step section-step-container">
-                    <div className="step-header">
-                      <span className="step-badge">2</span>
-                      <label>Select Sections</label>
+                  <div className="selection-step-v5 section-selection-container-v5">
+                    <div className="step-header-v5">
+                      <div className="header-text-group-v5">
+                        <span className="step-badge-v5">2</span>
+                        <label>Select Sections</label>
+                      </div>
+                      <button
+                        type="button"
+                        className="btn-select-all-v5"
+                        onClick={handleSelectAllSectionsForSelectedCourses}
+                      >
+                        Select All for {tempSelectedCourseNames.length} Courses
+                      </button>
                     </div>
-                    <div className="grouped-sections-list">
+                    <div className="sections-card-list-v5">
                       {tempSelectedCourseNames.map(courseName => {
-                        const sectionsForThisCourse = courses
+                        const courseSections = courses
                           .filter(c => c.name === courseName)
                           .map(c => c.section);
 
-                        const isFullySelected = isCourseFullySelected(courseName, sectionsForThisCourse);
+                        const isCourseComplete = isCourseFullySelected(courseName, courseSections);
 
                         return (
-                          <div key={courseName} className="course-section-group">
-                            <div className="course-group-header">
-                              <label className="course-group-title">
+                          <div key={courseName} className="course-section-row-v5">
+                            <div className="row-info-v5">
+                              <label className="row-header-checkbox-v5">
                                 <input
                                   type="checkbox"
-                                  checked={isFullySelected}
-                                  onChange={() => toggleCourseDirect(courseName, sectionsForThisCourse)}
+                                  checked={isCourseComplete}
+                                  onChange={() => toggleCourseDirect(courseName, courseSections)}
                                 />
-                                <span>{courseName}</span>
+                                <span className="row-course-name-v5">{courseName}</span>
                               </label>
-                              <span className="section-count">
-                                ({sectionsForThisCourse.length} sections)
-                              </span>
+                              <span className="row-section-count-v5">{courseSections.length} sections found</span>
                             </div>
-                            <div className="course-group-sections">
-                              {sectionsForThisCourse.map(section => (
-                                <label key={section} className="section-checkbox-label">
+                            <div className="row-chips-v5">
+                              {courseSections.map(section => (
+                                <label key={section} className={`section-btn-v5 ${isSectionSelected(courseName, section) ? 'active' : ''}`}>
                                   <input
                                     type="checkbox"
                                     checked={isSectionSelected(courseName, section)}
