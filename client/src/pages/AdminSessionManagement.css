@@ -668,105 +668,156 @@
 }
 
 
-/* Multiple Course Selection Styles */
-.course-selector-container {
+/* Global Multi-Course Selection Styles */
+.course-multi-selector {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 16px;
+  border: 2px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.search-bar-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-bar-wrapper .form-control {
+  padding-right: 40px;
+  height: 45px;
+  border-radius: 10px;
+  border: 2px solid var(--border-color);
+  transition: all 0.3s ease;
+}
+
+.search-bar-wrapper .form-control:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.clear-search {
+  position: absolute;
+  right: 12px;
+  background: #e2e8f0;
+  border: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4a5568;
+  font-size: 18px;
+  transition: all 0.2s ease;
+}
+
+.clear-search:hover {
+  background: #cbd5e0;
+  color: #2d3748;
+}
+
+.grouped-courses-list {
+  max-height: 400px;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  background: #f8f9fa;
-  padding: 20px;
-  border-radius: 12px;
-  border: 2px solid var(--border-color);
+  padding-right: 8px;
 }
 
-.course-dropdown-wrapper {
-  max-width: 400px;
+.grouped-courses-list::-webkit-scrollbar {
+  width: 6px;
 }
 
-.sections-selection-area {
+.grouped-courses-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.grouped-courses-list::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 10px;
+}
+
+.course-group {
   background: white;
-  padding: 16px;
-  border-radius: 8px;
+  border-radius: 12px;
   border: 1px solid var(--border-color);
-  animation: fadeIn 0.3s ease;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
 }
 
-.sections-header {
+.course-group-header {
+  padding: 12px 16px;
+  background: #f1f5f9;
+  border-bottom: 1px solid var(--border-color);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
 }
 
-.sections-header label {
-  font-weight: 600;
+.course-group-title {
+  display: flex !important;
+  align-items: center;
+  gap: 12px;
+  font-weight: 700 !important;
   color: var(--text-primary);
   margin-bottom: 0 !important;
-}
-
-.section-bulk-actions {
-  display: flex;
-  gap: 12px;
-}
-
-.btn-link {
-  background: none;
-  border: none;
-  color: var(--primary-color);
-  font-size: 0.85rem;
-  font-weight: 600;
   cursor: pointer;
-  padding: 0;
-  text-decoration: underline;
-  transition: var(--transition);
 }
 
-.btn-link:hover {
-  color: var(--secondary-color);
+.course-group-title input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--primary-color);
 }
 
-.sections-grid {
+.section-count {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.course-group-sections {
+  padding: 12px;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
   gap: 10px;
-  margin-bottom: 16px;
-  max-height: 200px;
-  overflow-y: auto;
-  padding: 4px;
 }
 
 .section-checkbox-label {
   display: flex !important;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   padding: 8px 12px;
   background: #f8f9fa;
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 0.9rem;
-  font-weight: normal !important;
+  font-size: 0.85rem;
+  font-weight: 600 !important;
 }
 
 .section-checkbox-label:hover {
   border-color: var(--primary-color);
   background: white;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .section-checkbox-label input[type="checkbox"] {
   width: 16px;
   height: 16px;
-  cursor: pointer;
   accent-color: var(--primary-color);
 }
 
-.btn-block {
-  width: 100%;
-}
-
 @media (max-width: 480px) {
-  .sections-grid {
-    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  .course-group-sections {
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
   }
 }

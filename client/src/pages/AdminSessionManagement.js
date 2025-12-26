@@ -24,7 +24,7 @@ const AdminSessionManagement = () => {
     duration: 30,
     location: { latitude: null, longitude: null }
   });
-  const [selectedCourse, setSelectedCourse] = useState({ course: '', sections: [] });
+  const [courseSearchTerm, setCourseSearchTerm] = useState('');
   const [mapLocation, setMapLocation] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -168,41 +168,55 @@ const AdminSessionManagement = () => {
     setError('');
   };
 
-  const handleAddCourse = () => {
-    if (selectedCourse.course && selectedCourse.sections.length > 0) {
-      const newCourses = [...formData.courses];
+  const toggleSectionDirect = (courseName, sectionName) => {
+    const isSelected = formData.courses.some(
+      c => c.course === courseName && c.section === sectionName
+    );
 
-      selectedCourse.sections.forEach(section => {
-        const exists = newCourses.some(
-          c => c.course === selectedCourse.course && c.section === section
-        );
-        if (!exists) {
-          newCourses.push({ course: selectedCourse.course, section });
-        }
-      });
-
-      setFormData({
-        ...formData,
-        courses: newCourses
-      });
-      setSelectedCourse({ course: '', sections: [] });
+    let newCourses;
+    if (isSelected) {
+      newCourses = formData.courses.filter(
+        c => !(c.course === courseName && c.section === sectionName)
+      );
+    } else {
+      newCourses = [...formData.courses, { course: courseName, section: sectionName }];
     }
+
+    setFormData({ ...formData, courses: newCourses });
   };
 
-  const toggleSectionSelection = (section) => {
-    const newSections = selectedCourse.sections.includes(section)
-      ? selectedCourse.sections.filter(s => s !== section)
-      : [...selectedCourse.sections, section];
-    setSelectedCourse({ ...selectedCourse, sections: newSections });
+  const toggleCourseDirect = (courseName, allSections) => {
+    const selectedSectionsOfCourse = formData.courses
+      .filter(c => c.course === courseName)
+      .map(c => c.section);
+
+    const isAllSelected = allSections.length > 0 &&
+      allSections.every(s => selectedSectionsOfCourse.includes(s));
+
+    let newCourses;
+    if (isAllSelected) {
+      // Remove all sections of this course
+      newCourses = formData.courses.filter(c => c.course !== courseName);
+    } else {
+      // Add all sections of this course (avoid duplicates)
+      const otherCourses = formData.courses.filter(c => c.course !== courseName);
+      const addedSections = allSections.map(s => ({ course: courseName, section: s }));
+      newCourses = [...otherCourses, ...addedSections];
+    }
+
+    setFormData({ ...formData, courses: newCourses });
   };
 
-  const handleSelectAllSections = () => {
-    const allSections = sectionsForCourse;
-    setSelectedCourse({ ...selectedCourse, sections: allSections });
+  const isSectionSelected = (courseName, sectionName) => {
+    return formData.courses.some(c => c.course === courseName && c.section === sectionName);
   };
 
-  const handleDeselectAllSections = () => {
-    setSelectedCourse({ ...selectedCourse, sections: [] });
+  const isCourseFullySelected = (courseName, allSections) => {
+    if (allSections.length === 0) return false;
+    const selectedSectionsOfCourse = formData.courses
+      .filter(c => c.course === courseName)
+      .map(c => c.section);
+    return allSections.every(s => selectedSectionsOfCourse.includes(s));
   };
 
   const handleRemoveCourse = (index) => {
@@ -564,51 +578,69 @@ const AdminSessionManagement = () => {
 
             <div className="form-group">
               <label>Select Courses & Sections</label>
-              <div className="course-selector-container">
-                <div className="course-dropdown-wrapper">
-                  <select
+              <div className="course-multi-selector">
+                <div className="search-bar-wrapper">
+                  <input
+                    type="text"
                     className="form-control"
-                    value={selectedCourse.course}
-                    onChange={(e) => setSelectedCourse({ course: e.target.value, sections: [] })}
-                  >
-                    <option value="">Select Course</option>
-                    {uniqueCourses.map(course => (
-                      <option key={course} value={course}>{course}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {selectedCourse.course && (
-                  <div className="sections-selection-area">
-                    <div className="sections-header">
-                      <label>Select Sections for {selectedCourse.course}:</label>
-                      <div className="section-bulk-actions">
-                        <button type="button" onClick={handleSelectAllSections} className="btn-link">Select All</button>
-                        <button type="button" onClick={handleDeselectAllSections} className="btn-link">Deselect All</button>
-                      </div>
-                    </div>
-                    <div className="sections-grid">
-                      {sectionsForCourse.map(section => (
-                        <label key={section} className="section-checkbox-label">
-                          <input
-                            type="checkbox"
-                            checked={selectedCourse.sections.includes(section)}
-                            onChange={() => toggleSectionSelection(section)}
-                          />
-                          <span>{section}</span>
-                        </label>
-                      ))}
-                    </div>
+                    placeholder="Search courses..."
+                    value={courseSearchTerm}
+                    onChange={(e) => setCourseSearchTerm(e.target.value)}
+                  />
+                  {courseSearchTerm && (
                     <button
                       type="button"
-                      onClick={handleAddCourse}
-                      className="btn btn-secondary btn-block"
-                      disabled={selectedCourse.sections.length === 0}
+                      className="clear-search"
+                      onClick={() => setCourseSearchTerm('')}
                     >
-                      Add Selected Sections
+                      ×
                     </button>
-                  </div>
-                )}
+                  )}
+                </div>
+
+                <div className="grouped-courses-list">
+                  {uniqueCourses
+                    .filter(courseName =>
+                      courseName.toLowerCase().includes(courseSearchTerm.toLowerCase())
+                    )
+                    .map(courseName => {
+                      const sectionsForThisCourse = courses
+                        .filter(c => c.name === courseName)
+                        .map(c => c.section);
+
+                      const isFullySelected = isCourseFullySelected(courseName, sectionsForThisCourse);
+
+                      return (
+                        <div key={courseName} className="course-group">
+                          <div className="course-group-header">
+                            <label className="course-group-title">
+                              <input
+                                type="checkbox"
+                                checked={isFullySelected}
+                                onChange={() => toggleCourseDirect(courseName, sectionsForThisCourse)}
+                              />
+                              <span>{courseName}</span>
+                            </label>
+                            <span className="section-count">
+                              ({sectionsForThisCourse.length} sections)
+                            </span>
+                          </div>
+                          <div className="course-group-sections">
+                            {sectionsForThisCourse.map(section => (
+                              <label key={section} className="section-checkbox-label">
+                                <input
+                                  type="checkbox"
+                                  checked={isSectionSelected(courseName, section)}
+                                  onChange={() => toggleSectionDirect(courseName, section)}
+                                />
+                                <span>{section}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
               </div>
               {formData.courses.length > 0 && (
                 <div className="selected-courses">
