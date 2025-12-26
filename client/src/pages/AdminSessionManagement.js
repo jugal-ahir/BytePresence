@@ -468,9 +468,6 @@ const AdminSessionManagement = () => {
   };
 
   const uniqueCourses = [...new Set(courses.map(c => c.name))];
-  const sectionsForCourse = courses
-    .filter(c => c.name === selectedCourse.course)
-    .map(c => c.section);
 
   // Pagination logic
   const totalPages = Math.ceil(sessions.length / sessionsPerPage);
