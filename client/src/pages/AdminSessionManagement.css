@@ -384,6 +384,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -406,6 +407,7 @@
     opacity: 0;
     transform: translateY(30px) scale(0.95);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -665,3 +667,106 @@
   }
 }
 
+
+/* Multiple Course Selection Styles */
+.course-selector-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 12px;
+  border: 2px solid var(--border-color);
+}
+
+.course-dropdown-wrapper {
+  max-width: 400px;
+}
+
+.sections-selection-area {
+  background: white;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  animation: fadeIn 0.3s ease;
+}
+
+.sections-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.sections-header label {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0 !important;
+}
+
+.section-bulk-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  transition: var(--transition);
+}
+
+.btn-link:hover {
+  color: var(--secondary-color);
+}
+
+.sections-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.section-checkbox-label {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  font-weight: normal !important;
+}
+
+.section-checkbox-label:hover {
+  border-color: var(--primary-color);
+  background: white;
+}
+
+.section-checkbox-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--primary-color);
+}
+
+.btn-block {
+  width: 100%;
+}
+
+@media (max-width: 480px) {
+  .sections-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  }
+}

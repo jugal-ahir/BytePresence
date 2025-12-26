@@ -24,7 +24,7 @@ const AdminSessionManagement = () => {
     duration: 30,
     location: { latitude: null, longitude: null }
   });
-  const [selectedCourse, setSelectedCourse] = useState({ course: '', section: '' });
+  const [selectedCourse, setSelectedCourse] = useState({ course: '', sections: [] });
   const [mapLocation, setMapLocation] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -169,18 +169,40 @@ const AdminSessionManagement = () => {
   };
 
   const handleAddCourse = () => {
-    if (selectedCourse.course && selectedCourse.section) {
-      const exists = formData.courses.some(
-        c => c.course === selectedCourse.course && c.section === selectedCourse.section
-      );
-      if (!exists) {
-        setFormData({
-          ...formData,
-          courses: [...formData.courses, { ...selectedCourse }]
-        });
-        setSelectedCourse({ course: '', section: '' });
-      }
+    if (selectedCourse.course && selectedCourse.sections.length > 0) {
+      const newCourses = [...formData.courses];
+
+      selectedCourse.sections.forEach(section => {
+        const exists = newCourses.some(
+          c => c.course === selectedCourse.course && c.section === section
+        );
+        if (!exists) {
+          newCourses.push({ course: selectedCourse.course, section });
+        }
+      });
+
+      setFormData({
+        ...formData,
+        courses: newCourses
+      });
+      setSelectedCourse({ course: '', sections: [] });
     }
+  };
+
+  const toggleSectionSelection = (section) => {
+    const newSections = selectedCourse.sections.includes(section)
+      ? selectedCourse.sections.filter(s => s !== section)
+      : [...selectedCourse.sections, section];
+    setSelectedCourse({ ...selectedCourse, sections: newSections });
+  };
+
+  const handleSelectAllSections = () => {
+    const allSections = sectionsForCourse;
+    setSelectedCourse({ ...selectedCourse, sections: allSections });
+  };
+
+  const handleDeselectAllSections = () => {
+    setSelectedCourse({ ...selectedCourse, sections: [] });
   };
 
   const handleRemoveCourse = (index) => {
@@ -541,33 +563,52 @@ const AdminSessionManagement = () => {
             </div>
 
             <div className="form-group">
-              <label>Select Courses</label>
-              <div className="course-selector">
-                <select
-                  className="form-control"
-                  value={selectedCourse.course}
-                  onChange={(e) => setSelectedCourse({ ...selectedCourse, course: e.target.value, section: '' })}
-                >
-                  <option value="">Select Course</option>
-                  {uniqueCourses.map(course => (
-                    <option key={course} value={course}>{course}</option>
-                  ))}
-                </select>
-                {selectedCourse.course && (
+              <label>Select Courses & Sections</label>
+              <div className="course-selector-container">
+                <div className="course-dropdown-wrapper">
                   <select
                     className="form-control"
-                    value={selectedCourse.section}
-                    onChange={(e) => setSelectedCourse({ ...selectedCourse, section: e.target.value })}
+                    value={selectedCourse.course}
+                    onChange={(e) => setSelectedCourse({ course: e.target.value, sections: [] })}
                   >
-                    <option value="">Select Section</option>
-                    {sectionsForCourse.map(section => (
-                      <option key={section} value={section}>{section}</option>
+                    <option value="">Select Course</option>
+                    {uniqueCourses.map(course => (
+                      <option key={course} value={course}>{course}</option>
                     ))}
                   </select>
+                </div>
+
+                {selectedCourse.course && (
+                  <div className="sections-selection-area">
+                    <div className="sections-header">
+                      <label>Select Sections for {selectedCourse.course}:</label>
+                      <div className="section-bulk-actions">
+                        <button type="button" onClick={handleSelectAllSections} className="btn-link">Select All</button>
+                        <button type="button" onClick={handleDeselectAllSections} className="btn-link">Deselect All</button>
+                      </div>
+                    </div>
+                    <div className="sections-grid">
+                      {sectionsForCourse.map(section => (
+                        <label key={section} className="section-checkbox-label">
+                          <input
+                            type="checkbox"
+                            checked={selectedCourse.sections.includes(section)}
+                            onChange={() => toggleSectionSelection(section)}
+                          />
+                          <span>{section}</span>
+                        </label>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleAddCourse}
+                      className="btn btn-secondary btn-block"
+                      disabled={selectedCourse.sections.length === 0}
+                    >
+                      Add Selected Sections
+                    </button>
+                  </div>
                 )}
-                <button type="button" onClick={handleAddCourse} className="btn btn-secondary">
-                  Add Course
-                </button>
               </div>
               {formData.courses.length > 0 && (
                 <div className="selected-courses">
