@@ -204,7 +204,7 @@ const AdminSessionManagement = () => {
       setError('Please select a location on the map or enter coordinates manually');
       return;
     }
-    
+
     // Validate coordinates
     if (formData.location.latitude < -90 || formData.location.latitude > 90) {
       setError('Latitude must be between -90 and 90');
@@ -220,7 +220,7 @@ const AdminSessionManagement = () => {
       setGlobalSuccess('');
       const payload = {
         ...formData,
-        startTime: startImmediately ? null : formData.startTime
+        startTime: startImmediately ? null : new Date(formData.startTime).toISOString()
       };
       await api.post('/api/sessions', payload);
       setSuccess('Session created successfully!');
@@ -408,7 +408,7 @@ const AdminSessionManagement = () => {
       };
 
       if (editingSession.status === 'scheduled' && editFormData.startTime) {
-        updateData.startTime = editFormData.startTime;
+        updateData.startTime = new Date(editFormData.startTime).toISOString();
       }
 
       await api.patch(`/api/sessions/${editingSession._id}`, updateData);
@@ -692,8 +692,8 @@ const AdminSessionManagement = () => {
                       Coordinates: {formData.location.latitude.toFixed(6)}, {formData.location.longitude.toFixed(6)}
                     </p>
                   )}
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={() => {
                       if (formData.location.latitude && formData.location.longitude) {
                         setMapLocation([formData.location.latitude, formData.location.longitude]);
@@ -757,7 +757,7 @@ const AdminSessionManagement = () => {
                       </button>
                     </div>
                   </div>
-                  <p><strong>Status:</strong> 
+                  <p><strong>Status:</strong>
                     <span className={`status-badge status-${session.status}`}>
                       {session.status}
                     </span>
@@ -772,7 +772,7 @@ const AdminSessionManagement = () => {
                     const maxIndex = Math.max(0, session.blockedStudents.length - studentsPerView);
                     const canGoLeft = currentIndex > 0;
                     const canGoRight = currentIndex < maxIndex;
-                    
+
                     return (
                       <div className="blocked-students-info">
                         <strong>Blocked Students ({session.blockedStudents.length}):</strong>
@@ -1009,8 +1009,8 @@ const AdminSessionManagement = () => {
                         Coordinates: {editFormData.location.latitude.toFixed(6)}, {editFormData.location.longitude.toFixed(6)}
                       </p>
                     )}
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       onClick={() => {
                         if (editFormData.location.latitude && editFormData.location.longitude) {
                           setEditMapLocation([editFormData.location.latitude, editFormData.location.longitude]);
@@ -1044,8 +1044,8 @@ const AdminSessionManagement = () => {
                       // Only show students enrolled in session courses
                       return editFormData.courses.some(sessionCourse => {
                         return student.courses.some(userCourse => {
-                          return userCourse.course === sessionCourse.course && 
-                                 userCourse.section === sessionCourse.section;
+                          return userCourse.course === sessionCourse.course &&
+                            userCourse.section === sessionCourse.section;
                         });
                       });
                     });
