@@ -328,7 +328,7 @@ This project is licensed under the ISC License.
 
 ## 👤 Contributor
 
-**Nitant Jain**
+**Nitant Jain** [@nitantjain](https://github.com/Nitantjain21022006)
 
 ## 🙏 Acknowledgments
 

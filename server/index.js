@@ -60,7 +60,7 @@ app.listen(PORT, () => {
 
   // Initialize keep-alive for Render
   const { startKeepAlive } = require('./utils/keepAlive');
-  const BACKEND_URL = process.env.BACKEND_URL || 'https://byte-copied.onrender.com/api/health';
+  const BACKEND_URL = process.env.BACKEND_URL || 'https://bytepresence-azo2.onrender.com/api/health';
   startKeepAlive(BACKEND_URL);
 });
 
