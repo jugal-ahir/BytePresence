@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import api from '../utils/api';
 import 'leaflet/dist/leaflet.css';
@@ -12,6 +12,36 @@ L.Icon.Default.mergeOptions({
   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
 });
+
+// Snap to Location Button Component
+const SnapButton = ({ userLocation }) => {
+  const map = useMap();
+
+  const handleSnap = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (userLocation) {
+      map.setView(userLocation, 17);
+    }
+  };
+
+  return (
+    <div className="leaflet-bottom leaflet-right" style={{ marginBottom: '20px', marginRight: '10px' }}>
+      <div className="leaflet-control leaflet-bar">
+        <button
+          onClick={handleSnap}
+          className="snap-button"
+          title="Snap to my location"
+          type="button"
+        >
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+            <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1c0-.55-.45-1-1-1s-1 .45-1 1v2.06C6.83 3.52 3.52 6.83 3.06 11H1c-.55 0-1 .45-1 1s.45 1 1 1h2.06c.46 4.17 3.77 7.48 7.94 7.94V23c0 .55.45 1 1 1s1-.45 1-1v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23c.55 0 1-.45 1-1s-.45-1-1-1h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  );
+};
 
 const AdminSessionManagement = () => {
   const [sessions, setSessions] = useState([]);
@@ -113,6 +143,20 @@ const AdminSessionManagement = () => {
   };
 
   const getCurrentLocation = () => {
+    if (currentAdminLocation) {
+      setMapLocation(currentAdminLocation);
+      setFormData({
+        ...formData,
+        location: {
+          latitude: currentAdminLocation[0],
+          longitude: currentAdminLocation[1]
+        }
+      });
+      setManualLatitude(currentAdminLocation[0].toFixed(6));
+      setManualLongitude(currentAdminLocation[1].toFixed(6));
+      return;
+    }
+
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -125,6 +169,8 @@ const AdminSessionManagement = () => {
               longitude: position.coords.longitude
             }
           });
+          setManualLatitude(position.coords.latitude.toFixed(6));
+          setManualLongitude(position.coords.longitude.toFixed(6));
         },
         (error) => {
           console.error('Error getting location:', error);
@@ -814,6 +860,7 @@ const AdminSessionManagement = () => {
                           <Popup>You Are Here (Live)</Popup>
                         </Marker>
                       )}
+                      <SnapButton userLocation={currentAdminLocation} />
                     </MapContainer>
                   </div>
                   {formData.location.latitude && (
@@ -1144,6 +1191,7 @@ const AdminSessionManagement = () => {
                             <Popup>Selected Location</Popup>
                           </Marker>
                         )}
+                        <SnapButton userLocation={currentAdminLocation} />
                       </MapContainer>
                     </div>
                     {editFormData.location.latitude && (

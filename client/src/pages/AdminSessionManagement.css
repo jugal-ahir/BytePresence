@@ -1,4 +1,4 @@
-.radio-group {
+﻿.radio-group {
   display: flex;
   gap: 20px;
 }
@@ -965,4 +965,28 @@
   .course-grid-v5 {
     grid-template-columns: 1fr;
   }
+}
+
+.snap-button {
+  background: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #2d3748;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.snap-button:hover {
+  color: var(--primary-color, #48bb78);
+  background: #f7fafc;
+}
+
+.snap-button svg {
+  width: 24px;
+  height: 24px;
 }
