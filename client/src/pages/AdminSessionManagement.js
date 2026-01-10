@@ -56,11 +56,27 @@ const AdminSessionManagement = () => {
   const [blockedStudentsCarouselIndex, setBlockedStudentsCarouselIndex] = useState({});
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [blockedStudentsSearch, setBlockedStudentsSearch] = useState('');
+  const [currentAdminLocation, setCurrentAdminLocation] = useState(null);
+  const [showLiveLocation, setShowLiveLocation] = useState(true);
 
   useEffect(() => {
     fetchData();
-    getCurrentLocation();
     fetchStudents();
+
+    let watchId = null;
+    if (navigator.geolocation) {
+      watchId = navigator.geolocation.watchPosition(
+        (position) => {
+          setCurrentAdminLocation([position.coords.latitude, position.coords.longitude]);
+        },
+        (error) => console.error('Admin watch error:', error),
+        { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
+      );
+    }
+
+    return () => {
+      if (watchId) navigator.geolocation.clearWatch(watchId);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -112,7 +128,9 @@ const AdminSessionManagement = () => {
         },
         (error) => {
           console.error('Error getting location:', error);
-        }
+          alert('Unable to get current location. Please check permissions.');
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
     }
   };
@@ -780,7 +798,20 @@ const AdminSessionManagement = () => {
                       />
                       {mapLocation && (
                         <Marker position={mapLocation}>
-                          <Popup>Selected Location</Popup>
+                          <Popup>Session Center</Popup>
+                        </Marker>
+                      )}
+                      {showLiveLocation && currentAdminLocation && (
+                        <Marker
+                          position={currentAdminLocation}
+                          icon={new L.Icon({
+                            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
+                            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                            iconSize: [25, 41],
+                            iconAnchor: [12, 41]
+                          })}
+                        >
+                          <Popup>You Are Here (Live)</Popup>
                         </Marker>
                       )}
                     </MapContainer>
@@ -790,9 +821,19 @@ const AdminSessionManagement = () => {
                       Selected: {formData.location.latitude.toFixed(6)}, {formData.location.longitude.toFixed(6)}
                     </p>
                   )}
-                  <button type="button" onClick={getCurrentLocation} className="btn btn-secondary" style={{ marginTop: '10px' }}>
-                    Use Current Location
-                  </button>
+                  <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                    <button type="button" onClick={getCurrentLocation} className="btn btn-secondary">
+                      Snap to My Current Location
+                    </button>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px' }}>
+                      <input
+                        type="checkbox"
+                        checked={showLiveLocation}
+                        onChange={(e) => setShowLiveLocation(e.target.checked)}
+                      />
+                      Show My Live Position (Blue)
+                    </label>
+                  </div>
                 </>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>

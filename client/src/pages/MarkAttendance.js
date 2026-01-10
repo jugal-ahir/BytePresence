@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MapContainer, TileLayer, Circle, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Circle, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
@@ -35,6 +35,23 @@ const targetIcon = new L.Icon({
   shadowSize: [41, 41]
 });
 
+// Map auto-fit component
+const MapBoundsManager = ({ userLocation, sessionLocation, radius }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (userLocation && sessionLocation) {
+      const bounds = L.latLngBounds([
+        [sessionLocation.latitude, sessionLocation.longitude],
+        [userLocation[0], userLocation[1]]
+      ]);
+      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 18 });
+    }
+  }, [userLocation, sessionLocation, map]);
+
+  return null;
+};
+
 const MarkAttendance = () => {
   const { sessionId } = useParams();
   const navigate = useNavigate();
@@ -47,12 +64,16 @@ const MarkAttendance = () => {
   const [marking, setMarking] = useState(false);
   const [attendanceMarked, setAttendanceMarked] = useState(false);
   const [markedAt, setMarkedAt] = useState(null);
+  const [locationAccuracy, setLocationAccuracy] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
   useEffect(() => {
     fetchSession();
-    getCurrentLocation();
+    const watchId = startLocationWatch();
+    return () => {
+      if (watchId) navigator.geolocation.clearWatch(watchId);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionId]);
 
@@ -71,25 +92,35 @@ const MarkAttendance = () => {
     }
   };
 
-  const getCurrentLocation = () => {
+  const startLocationWatch = () => {
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
+      return navigator.geolocation.watchPosition(
         (position) => {
           const location = {
             lat: position.coords.latitude,
             lng: position.coords.longitude
           };
           setUserLocation([location.lat, location.lng]);
+          setLocationAccuracy(position.coords.accuracy);
           if (session) {
             calculateDistance(location, session.location);
           }
+          setLoading(false);
         },
         (error) => {
-          setError('Unable to get your location. Please enable location services.');
-        }
+          let msg = 'Unable to get your location.';
+          if (error.code === 1) msg = 'Location access denied. Please enable location permissions.';
+          else if (error.code === 2) msg = 'Location unavailable. Try moving to an open area.';
+          else if (error.code === 3) msg = 'Location request timed out.';
+          setError(msg);
+          setLoading(false);
+        },
+        { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
       );
     } else {
       setError('Geolocation is not supported by your browser.');
+      setLoading(false);
+      return null;
     }
   };
 
@@ -183,7 +214,25 @@ const MarkAttendance = () => {
           </span>
         </p>
         {distance !== null && (
-          <p><strong>Distance from location:</strong> {distance.toFixed(2)} meters</p>
+          <div className="location-stats">
+            <p><strong>Distance:</strong> {distance.toFixed(2)} meters</p>
+            {locationAccuracy && (
+              <p>
+                <strong>Accuracy:</strong> ±{locationAccuracy.toFixed(1)} meters
+                {locationAccuracy > 100 && (
+                  <span className="accuracy-warning" title="Poor accuracy might be due to indoor environment or GPS still locking"> ⚠️ Poor</span>
+                )}
+              </p>
+            )}
+            {userLocation && (
+              <p className="raw-coords">
+                <strong>Your Coordinates:</strong> {userLocation[0].toFixed(6)}, {userLocation[1].toFixed(6)}
+              </p>
+            )}
+            <div className="location-status-badge">
+              {loading ? <span className="tracking">Tracking...</span> : <span className="live">● LIVE</span>}
+            </div>
+          </div>
         )}
       </div>
 
@@ -202,6 +251,11 @@ const MarkAttendance = () => {
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            <MapBoundsManager
+              userLocation={userLocation}
+              sessionLocation={session.location}
+              radius={session.location.radius || 500}
             />
             <Circle
               center={center}
