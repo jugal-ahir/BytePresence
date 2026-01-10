@@ -9,6 +9,7 @@ const AdminCourseManagement = () => {
     name: '',
     section: ''
   });
+  const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -76,8 +77,14 @@ const AdminCourseManagement = () => {
     return <div className="loading">Loading...</div>;
   }
 
-  // Group courses by name
-  const groupedCourses = courses.reduce((acc, course) => {
+  // Filter and then group courses
+  const filteredCourses = courses.filter(course => {
+    return !searchTerm ||
+      course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      course.section.toLowerCase().includes(searchTerm.toLowerCase());
+  });
+
+  const groupedCourses = filteredCourses.reduce((acc, course) => {
     if (!acc[course.name]) {
       acc[course.name] = [];
     }
@@ -134,8 +141,22 @@ const AdminCourseManagement = () => {
       )}
 
       <div className="card">
-        <h2>All Courses ({courses.length})</h2>
-        {courses.length === 0 ? (
+        <div className="card-header-with-search">
+          <h2>All Courses ({filteredCourses.length} of {courses.length})</h2>
+          <div className="search-input-wrapper">
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Search courses or sections..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            {searchTerm && (
+              <button className="clear-search-btn" onClick={() => setSearchTerm('')}>×</button>
+            )}
+          </div>
+        </div>
+        {filteredCourses.length === 0 ? (
           <p className="no-data">No courses found. Create your first course above.</p>
         ) : (
           <div className="courses-list">

@@ -106,8 +106,33 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-  padding-bottom: 16px;
+  padding-bottom: 24px;
   border-bottom: 2px solid #e2e8f0;
+  gap: 20px;
+}
+
+.session-search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  max-width: 450px;
+  width: 100%;
+}
+
+.clear-search-btn {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #a0aec0;
+  cursor: pointer;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.clear-search-btn:hover {
+  color: #4a5568;
 }
 
 .pagination-info {

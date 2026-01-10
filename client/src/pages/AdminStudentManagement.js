@@ -21,6 +21,7 @@ const AdminStudentManagement = () => {
   const [editSelectedCourse, setEditSelectedCourse] = useState({ course: '', section: '' });
   const [filterCourse, setFilterCourse] = useState('');
   const [filterSection, setFilterSection] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -163,10 +164,17 @@ const AdminStudentManagement = () => {
     .filter(c => c.name === filterCourse)
     .map(c => c.section);
 
-  // Filter students based on selected course and section
+  // Filter students based on search term, selected course and section
   const filteredStudents = students.filter(student => {
+    const searchMatch = !searchTerm ||
+      student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.enrollmentNumber.toLowerCase().includes(searchTerm.toLowerCase());
+
+    if (!searchMatch) return false;
+
     if (!filterCourse && !filterSection) {
-      return true; // Show all if no filter
+      return true; // Show all searched if no other filters
     }
 
     // Check if student has the filtered course-section
@@ -180,6 +188,7 @@ const AdminStudentManagement = () => {
   const handleClearFilter = () => {
     setFilterCourse('');
     setFilterSection('');
+    setSearchTerm('');
   };
 
   if (loading) {
@@ -307,8 +316,23 @@ const AdminStudentManagement = () => {
         <div className="card-header-with-filter">
           <h2>All Students ({filteredStudents.length} of {students.length})</h2>
         </div>
-        
+
         <div className="filter-section">
+          <div className="search-bar-global">
+            <label>Search Students</label>
+            <div className="search-input-wrapper">
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Search by name, email, or enrollment number..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              {searchTerm && (
+                <button className="clear-search-btn" onClick={() => setSearchTerm('')}>×</button>
+              )}
+            </div>
+          </div>
           <div className="filter-controls">
             <div className="filter-group">
               <label>Filter by Course</label>
@@ -356,122 +380,122 @@ const AdminStudentManagement = () => {
 
         {error && <div className="error-message">{error}</div>}
         {success && <div className="success-message">{success}</div>}
-        
+
         {filteredStudents.length === 0 ? (
           <div className="no-data">
-            {filterCourse || filterSection 
-              ? 'No students found matching the selected filter.' 
+            {filterCourse || filterSection
+              ? 'No students found matching the selected filter.'
               : 'No students found.'}
           </div>
         ) : (
           <div className="students-table">
-          <table>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Enrollment Number</th>
-                <th>Email</th>
-                <th>Courses</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredStudents.map(student => (
-                <React.Fragment key={student._id}>
-                  <tr>
-                    <td>{student.name}</td>
-                    <td>{student.enrollmentNumber}</td>
-                    <td>{student.email}</td>
-                    <td>
-                      {student.courses.map((c, i) => (
-                        <span key={i} className="course-badge">
-                          {c.course} - {c.section}
-                        </span>
-                      ))}
-                    </td>
-                    <td>
-                      <button
-                        onClick={() => handleEditStudent(student)}
-                        className="btn btn-secondary btn-sm"
-                      >
-                        Edit Courses
-                      </button>
-                    </td>
-                  </tr>
-                  {editingStudent === student._id && (
-                    <tr className="edit-row">
-                      <td colSpan="5">
-                        <div className="edit-courses-panel">
-                          <h3>Edit Courses for {student.name}</h3>
-                          <div className="course-selector">
-                            <select
-                              className="form-control"
-                              value={editSelectedCourse.course}
-                              onChange={(e) => setEditSelectedCourse({ ...editSelectedCourse, course: e.target.value, section: '' })}
-                            >
-                              <option value="">Select Course</option>
-                              {uniqueCourses.map(course => (
-                                <option key={course} value={course}>{course}</option>
-                              ))}
-                            </select>
-                            {editSelectedCourse.course && (
-                              <select
-                                className="form-control"
-                                value={editSelectedCourse.section}
-                                onChange={(e) => setEditSelectedCourse({ ...editSelectedCourse, section: e.target.value })}
-                              >
-                                <option value="">Select Section</option>
-                                {courses
-                                  .filter(c => c.name === editSelectedCourse.course)
-                                  .map(c => c.section)
-                                  .map(section => (
-                                    <option key={section} value={section}>{section}</option>
-                                  ))}
-                              </select>
-                            )}
-                            <button type="button" onClick={handleAddEditCourse} className="btn btn-secondary">
-                              Add Course
-                            </button>
-                          </div>
-                          {editCourseData.courses.length > 0 && (
-                            <div className="selected-courses">
-                              {editCourseData.courses.map((course, index) => (
-                                <span key={index} className="course-tag">
-                                  {course.course} - {course.section}
-                                  <button
-                                    type="button"
-                                    onClick={() => handleRemoveEditCourse(index)}
-                                    className="remove-course"
-                                  >
-                                    ×
-                                  </button>
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                          <div className="edit-actions">
-                            <button
-                              onClick={() => handleUpdateStudentCourses(student._id)}
-                              className="btn btn-primary"
-                            >
-                              Save Changes
-                            </button>
-                            <button
-                              onClick={handleCancelEdit}
-                              className="btn btn-secondary"
-                            >
-                              Cancel
-                            </button>
-                          </div>
-                        </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Enrollment Number</th>
+                  <th>Email</th>
+                  <th>Courses</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredStudents.map(student => (
+                  <React.Fragment key={student._id}>
+                    <tr>
+                      <td>{student.name}</td>
+                      <td>{student.enrollmentNumber}</td>
+                      <td>{student.email}</td>
+                      <td>
+                        {student.courses.map((c, i) => (
+                          <span key={i} className="course-badge">
+                            {c.course} - {c.section}
+                          </span>
+                        ))}
+                      </td>
+                      <td>
+                        <button
+                          onClick={() => handleEditStudent(student)}
+                          className="btn btn-secondary btn-sm"
+                        >
+                          Edit Courses
+                        </button>
                       </td>
                     </tr>
-                  )}
-                </React.Fragment>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                    {editingStudent === student._id && (
+                      <tr className="edit-row">
+                        <td colSpan="5">
+                          <div className="edit-courses-panel">
+                            <h3>Edit Courses for {student.name}</h3>
+                            <div className="course-selector">
+                              <select
+                                className="form-control"
+                                value={editSelectedCourse.course}
+                                onChange={(e) => setEditSelectedCourse({ ...editSelectedCourse, course: e.target.value, section: '' })}
+                              >
+                                <option value="">Select Course</option>
+                                {uniqueCourses.map(course => (
+                                  <option key={course} value={course}>{course}</option>
+                                ))}
+                              </select>
+                              {editSelectedCourse.course && (
+                                <select
+                                  className="form-control"
+                                  value={editSelectedCourse.section}
+                                  onChange={(e) => setEditSelectedCourse({ ...editSelectedCourse, section: e.target.value })}
+                                >
+                                  <option value="">Select Section</option>
+                                  {courses
+                                    .filter(c => c.name === editSelectedCourse.course)
+                                    .map(c => c.section)
+                                    .map(section => (
+                                      <option key={section} value={section}>{section}</option>
+                                    ))}
+                                </select>
+                              )}
+                              <button type="button" onClick={handleAddEditCourse} className="btn btn-secondary">
+                                Add Course
+                              </button>
+                            </div>
+                            {editCourseData.courses.length > 0 && (
+                              <div className="selected-courses">
+                                {editCourseData.courses.map((course, index) => (
+                                  <span key={index} className="course-tag">
+                                    {course.course} - {course.section}
+                                    <button
+                                      type="button"
+                                      onClick={() => handleRemoveEditCourse(index)}
+                                      className="remove-course"
+                                    >
+                                      ×
+                                    </button>
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                            <div className="edit-actions">
+                              <button
+                                onClick={() => handleUpdateStudentCourses(student._id)}
+                                className="btn btn-primary"
+                              >
+                                Save Changes
+                              </button>
+                              <button
+                                onClick={handleCancelEdit}
+                                className="btn btn-secondary"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>

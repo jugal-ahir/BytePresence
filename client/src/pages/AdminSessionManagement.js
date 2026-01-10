@@ -88,6 +88,7 @@ const AdminSessionManagement = () => {
   const [blockedStudentsSearch, setBlockedStudentsSearch] = useState('');
   const [currentAdminLocation, setCurrentAdminLocation] = useState(null);
   const [showLiveLocation, setShowLiveLocation] = useState(true);
+  const [sessionSearchTerm, setSessionSearchTerm] = useState('');
 
   useEffect(() => {
     fetchData();
@@ -568,11 +569,22 @@ const AdminSessionManagement = () => {
 
   const uniqueCourses = [...new Set(courses.map(c => c.name))].sort();
 
+  // Filter sessions based on search term
+  const filteredSessionsList = sessions.filter(session => {
+    return !sessionSearchTerm ||
+      session.title.toLowerCase().includes(sessionSearchTerm.toLowerCase()) ||
+      session.status.toLowerCase().includes(sessionSearchTerm.toLowerCase()) ||
+      session.courses.some(c =>
+        c.course.toLowerCase().includes(sessionSearchTerm.toLowerCase()) ||
+        c.section.toLowerCase().includes(sessionSearchTerm.toLowerCase())
+      );
+  });
+
   // Pagination logic
-  const totalPages = Math.ceil(sessions.length / sessionsPerPage);
+  const totalPages = Math.ceil(filteredSessionsList.length / sessionsPerPage);
   const startIndex = (currentPage - 1) * sessionsPerPage;
   const endIndex = startIndex + sessionsPerPage;
-  const currentSessions = sessions.slice(startIndex, endIndex);
+  const currentSessions = filteredSessionsList.slice(startIndex, endIndex);
 
   const handlePreviousPage = () => {
     if (currentPage > 1) {
@@ -947,12 +959,25 @@ const AdminSessionManagement = () => {
 
       <div className="card">
         <div className="sessions-header">
-          <h2>All Sessions ({sessions.length})</h2>
-          {sessions.length > sessionsPerPage && (
-            <div className="pagination-info">
-              Page {currentPage} of {totalPages}
-            </div>
-          )}
+          <h2>All Sessions ({filteredSessionsList.length})</h2>
+          <div className="session-search-wrapper">
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Search sessions by title, course, or status..."
+              value={sessionSearchTerm}
+              onChange={(e) => {
+                setSessionSearchTerm(e.target.value);
+                setCurrentPage(1); // Reset to first page on search
+              }}
+            />
+            {sessionSearchTerm && (
+              <button className="clear-search-btn" onClick={() => setSessionSearchTerm('')}>×</button>
+            )}
+          </div>
+          <div className="pagination-info">
+            Page {currentPage} of {totalPages}
+          </div>
         </div>
         {globalError && <div className="error-message">{globalError}</div>}
         {globalSuccess && <div className="success-message">{globalSuccess}</div>}
