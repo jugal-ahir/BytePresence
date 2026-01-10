@@ -178,5 +178,40 @@ router.patch('/students/:id/courses', adminAuth, [
   }
 });
 
+// Reset Password (Admin)
+router.post('/reset-password', adminAuth, [
+  body('identifier').trim().notEmpty().withMessage('Email or Enrollment Number is required'),
+  body('newPassword').isLength({ min: 6 }).withMessage('Password must be at least 6 characters')
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { identifier, newPassword } = req.body;
+
+    // Find user by email or enrollment number
+    const user = await User.findOne({
+      $or: [
+        { email: identifier.toLowerCase() },
+        { enrollmentNumber: identifier.toUpperCase() }
+      ]
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    res.json({ message: `Password for ${user.name} has been reset successfully` });
+  } catch (error) {
+    console.error('Error resetting password:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
 module.exports = router;
 

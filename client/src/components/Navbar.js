@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import ResetPasswordModal from './ResetPasswordModal';
 import './Navbar.css';
 
 const Navbar = () => {
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [resetModalOpen, setResetModalOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -70,6 +72,16 @@ const Navbar = () => {
                   <Link to="/admin/sessions" className="navbar-link" onClick={handleLinkClick}>
                     Sessions
                   </Link>
+                  <button
+                    className="navbar-link btn-reset-pw"
+                    onClick={() => {
+                      setResetModalOpen(true);
+                      setMobileMenuOpen(false);
+                    }}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', font: 'inherit', textAlign: 'left' }}
+                  >
+                    Reset Password
+                  </button>
                 </>
               ) : (
                 <Link to="/student/dashboard" className="navbar-link" onClick={handleLinkClick}>
@@ -93,6 +105,10 @@ const Navbar = () => {
           )}
         </div>
       </div>
+      <ResetPasswordModal
+        isOpen={resetModalOpen}
+        onClose={() => setResetModalOpen(false)}
+      />
     </nav>
   );
 };
