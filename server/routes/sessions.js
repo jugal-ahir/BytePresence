@@ -249,10 +249,17 @@ router.get('/:sessionId', auth, async (req, res) => {
 router.get('/:sessionId/report', adminAuth, async (req, res) => {
   try {
     const { sessionId } = req.params;
-    const pdfBuffer = await generateAttendanceReport(sessionId);
+    const { course, section } = req.query;
+    const pdfBuffer = await generateAttendanceReport(sessionId, course, section);
+
+    let filename = `attendance-report-${sessionId}`;
+    if (course && section) {
+      const date = new Date().toISOString().split('T')[0];
+      filename = `${date}_${course}_${section}`;
+    }
 
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename=attendance-report-${sessionId}.pdf`);
+    res.setHeader('Content-Disposition', `attachment; filename=${filename}.pdf`);
     res.send(pdfBuffer);
   } catch (error) {
     console.error('Error generating report:', error);

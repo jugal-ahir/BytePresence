@@ -379,19 +379,36 @@ const AdminSessionManagement = () => {
     }
   };
 
-  const handleDownloadReport = async (sessionId) => {
+  const handleDownloadReport = async (session) => {
     try {
-      const response = await api.get(`/api/sessions/${sessionId}/report`, {
-        responseType: 'blob'
-      });
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `attendance-report-${sessionId}.pdf`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+      const { _id: sessionId, courses, startTime } = session;
+      const date = new Date(startTime).toISOString().split('T')[0];
+
+      // Download report for each course and section
+      for (const courseInfo of courses) {
+        const { course, section } = courseInfo;
+        const response = await api.get(`/api/sessions/${sessionId}/report`, {
+          params: { course, section },
+          responseType: 'blob'
+        });
+
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+
+        // Format: YYYY-MM-DD_Subject_Section.pdf
+        const filename = `${date}_${course}_${section}.pdf`;
+        link.setAttribute('download', filename);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+
+        // Small delay to prevent browser download issues with multiple files
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
     } catch (error) {
+      console.error('Download error:', error);
       alert('Error downloading report');
     }
   };
@@ -1081,7 +1098,7 @@ const AdminSessionManagement = () => {
                     )}
                     {session.status === 'ended' && (
                       <button
-                        onClick={() => handleDownloadReport(session._id)}
+                        onClick={() => handleDownloadReport(session)}
                         className="btn btn-success"
                       >
                         Download Report

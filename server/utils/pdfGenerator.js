@@ -3,15 +3,21 @@ const Attendance = require('../models/Attendance');
 const AttendanceSession = require('../models/AttendanceSession');
 const User = require('../models/User');
 
-async function generateAttendanceReport(sessionId) {
+async function generateAttendanceReport(sessionId, courseName, sectionName) {
   const session = await AttendanceSession.findById(sessionId).populate('createdBy');
   if (!session) {
     throw new Error('Session not found');
   }
 
-  // Get all students enrolled in the session's courses
-  const courseSections = session.courses.map(c => ({ course: c.course, section: c.section }));
-  
+  // Determine which course/section to report
+  let targetCourses = session.courses;
+  if (courseName && sectionName) {
+    targetCourses = [{ course: courseName, section: sectionName }];
+  }
+
+  // Get all students enrolled in the target courses
+  const courseSections = targetCourses.map(c => ({ course: c.course, section: c.section }));
+
   // Find students who have at least one matching course-section
   const enrolledStudents = await User.find({
     role: 'student',
@@ -20,14 +26,17 @@ async function generateAttendanceReport(sessionId) {
     }))
   }).sort({ enrollmentNumber: 1 });
 
-  // Get attendance records
-  const attendanceRecords = await Attendance.find({ session: sessionId })
+  // Get attendance records for this session
+  const query = { session: sessionId };
+  const attendanceRecords = await Attendance.find(query)
     .populate('student')
     .sort({ enrollmentNumber: 1 });
 
   const attendanceMap = new Map();
   attendanceRecords.forEach(record => {
-    attendanceMap.set(record.student._id.toString(), record);
+    if (record.student) {
+      attendanceMap.set(record.student._id.toString(), record);
+    }
   });
 
   // Separate students into present and absent
@@ -40,7 +49,7 @@ async function generateAttendanceReport(sessionId) {
       student,
       attendance
     };
-    
+
     if (attendance) {
       presentStudents.push(studentData);
     } else {
@@ -53,13 +62,16 @@ async function generateAttendanceReport(sessionId) {
   const chunks = [];
 
   doc.on('data', chunk => chunks.push(chunk));
-  doc.on('end', () => {});
+  doc.on('end', () => { });
 
   // Header
   doc.fontSize(20).text('Attendance Report', { align: 'center' });
   doc.moveDown();
   doc.fontSize(12);
   doc.text(`Session: ${session.title}`, { align: 'left' });
+  if (courseName && sectionName) {
+    doc.text(`Course: ${courseName} - Section: ${sectionName}`, { align: 'left' });
+  }
   doc.text(`Date: ${new Date(session.startTime).toLocaleDateString()}`, { align: 'left' });
   doc.text(`Time: ${new Date(session.startTime).toLocaleTimeString()} - ${new Date(session.endTime).toLocaleTimeString()}`, { align: 'left' });
   doc.moveDown();
@@ -118,14 +130,14 @@ async function generateAttendanceReport(sessionId) {
       }
 
       const student = studentData.student;
-      
+
       // Find matching course-section for this session
-      const matchingCourse = student.courses.find(sc => 
-        session.courses.some(sessionCourse => 
+      const matchingCourse = student.courses.find(sc =>
+        session.courses.some(sessionCourse =>
           sessionCourse.course === sc.course && sessionCourse.section === sc.section
         )
       );
-      const courseSection = matchingCourse 
+      const courseSection = matchingCourse
         ? `${matchingCourse.course} - ${matchingCourse.section}`
         : (student.courses.length > 0 ? `${student.courses[0].course} - ${student.courses[0].section}` : 'N/A');
 
